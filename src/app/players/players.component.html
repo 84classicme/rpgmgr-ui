@@ -1,0 +1,15 @@
+<h2>Players</h2>
+<ul class="players">
+  <li *ngFor="let player of players" (click)="onSelect(player)">
+    <span class="badge">{{player.id}}</span> {{player.firstname}} {{player.lastname}}
+  </li>
+</ul>
+
+<div *ngIf="selectedPlayer">
+  <h2>{{selectedPlayer.firstname | uppercase}} Details</h2>
+  <div><span>id: </span>{{selectedPlayer.id}}</div>
+  <div>
+    <label for="player-firstname">First: </label>
+    <input id="player-firstname" [(ngModel)]="selectedPlayer.firstname" placeholder="firstname">
+  </div>
+</div>
