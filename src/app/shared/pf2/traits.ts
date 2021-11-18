@@ -1,4 +1,4 @@
-import { ValueString } from "./valuestring";
+import { ValueString } from "../valuestring";
 
 export interface Traits{
     custom: string;

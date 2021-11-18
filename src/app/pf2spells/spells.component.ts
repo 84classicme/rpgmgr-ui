@@ -5,7 +5,7 @@ import { SpellService } from './spell.service';
 import {FilterService} from 'primeng/api';
 
 @Component({
-  selector: 'app-spells',
+  selector: 'app-pf2spells',
   templateUrl: './spells.component.html',
   styleUrls: ['./spells.component.scss']
 })

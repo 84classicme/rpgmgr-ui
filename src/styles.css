@@ -1,4 +1,13 @@
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
 body {
-    padding: 2em;
-    font-family: -apple-system, BlinkMacSystemFont, “Segoe UI”, Roboto, Helvetica, Arial, sans-serif, “Apple Color Emoji”, “Segoe UI Emoji”, “Segoe UI Symbol”;
-  }
+  font-family: Roboto, Arial, sans-serif;
+  margin: 0;
+  padding: 30px;
+}
+
+.version-info {
+  font-size: 8pt;
+  float: right;
+  margin: 8px;
+}
