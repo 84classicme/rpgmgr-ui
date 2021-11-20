@@ -18,6 +18,7 @@ import { PlayersComponent } from './players/players.component';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import {MaterialExampleModule} from '../material.module';
+import { StoreModule } from '@ngrx/store';
 @NgModule({
   declarations: [
     AppComponent,
@@ -41,7 +42,8 @@ import {MaterialExampleModule} from '../material.module';
     MatStepperModule,
     MatIconModule,
     MatSelectModule,
-    MaterialExampleModule
+    MaterialExampleModule,
+    StoreModule.forRoot({}, {})
   ],
   exports: [
     FormsModule,

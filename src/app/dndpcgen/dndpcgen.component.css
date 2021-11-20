@@ -14,18 +14,26 @@
     vertical-align: top;
   }
 
-  .ability-score-list-container {
-    width: 22px;
+  .ability-container-header {
+    font-size: large;
+    align-content: center;
+  }
+
+  .ability-header {
+    font-size: large;
+    align-content: center;
+  }
+
+  .ability-list-container {
+    display: flex;
     max-width: 100%;
     margin: 0 22px 22px 0;
-    display: inline-block;
-    vertical-align: top;
-    align-items: center;
   }
 
   .ability-box {
     width: 20px;
     height: 20px;
+    margin: 5px;
     border: solid 1px #ccc;
     color: rgba(0, 0, 0, 0.87);
     cursor: move;
@@ -58,16 +66,28 @@
     vertical-align: top;
   }
   
-  .ability-list {
+  .ability-array-list {
     border: solid 1px #ccc;
-    min-height: 60px;
+    min-height: 120px;
+    width: 40px;
+    padding: 5px;
     background: white;
     border-radius: 4px;
     overflow: hidden;
     display: block;
   }
 
-
+  .ability-list {
+    border: solid 1px #ccc;
+    display: flex;
+    align-items: center;
+    width: 40px;
+    min-height: 40px;
+    background: white;
+    border-radius: 4px;
+    overflow: hidden;
+    padding: 5px;
+  }
   
   .ability-box:active {
     box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),

@@ -1,6 +1,6 @@
 <mat-stepper orientation="vertical" [linear]="isLinear" #stepper>
-    <mat-step [stepControl]="firstFormGroup">
-        <form [formGroup]="firstFormGroup">
+    <mat-step [stepControl]="raceFG">
+        <form [formGroup]="raceFG">
         <ng-template matStepLabel>Choose your race</ng-template>
         <mat-form-field appearance="fill">
             <mat-label>Race</mat-label>
@@ -9,12 +9,12 @@
             </mat-select>
         </mat-form-field>
         <div>
-            <button mat-button matStepperNext>Next</button>
+            <button mat-button matStepperNext (click)="saveRace()">Next</button>
         </div>
         </form>
     </mat-step>
-    <mat-step [stepControl]="secondFormGroup" label="Choose your class">
-        <form [formGroup]="secondFormGroup">
+    <mat-step [stepControl]="classFG" label="Choose your class">
+        <form [formGroup]="classFG">
         <mat-form-field appearance="fill">
             <mat-label>Class</mat-label>
             <mat-select formControlName="class" class="form-control" required>
@@ -23,12 +23,121 @@
         </mat-form-field>
         <div>
             <button mat-button matStepperPrevious>Back</button>
-            <button mat-button matStepperNext>Next</button>
+            <button mat-button matStepperNext (click)="saveClass()">Next</button>
         </div>
         </form>
     </mat-step>
-    <mat-step [stepControl]="fourthFormGroup" label="Describe your character">
-        <form [formGroup]="fourthFormGroup">
+    <mat-step [stepControl]="abilitiesFG" label="Determine your ability scores">
+        <form [formGroup]="abilitiesFG">
+            <input matInput formControlName="str" hidden>
+            <input matInput formControlName="dex" hidden>
+            <input matInput formControlName="con" hidden>
+            <input matInput formControlName="int" hidden>
+            <input matInput formControlName="wis" hidden>
+            <input matInput formControlName="cha" hidden>
+            <div cdkDropListGroup>
+                <div class="ability-array-container">
+                    <div class="ability-container-header">Scores</div> 
+                    <div class="ability-list-container">
+                        <div
+                            cdkDropList
+                            id="array"
+                            class="ability-array-list"
+                            [cdkDropListData]="abilities"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of abilities" cdkDrag>{{item}}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ability-scores-container">
+                    <div class="ability-container">
+                        <div class="ability-header">Strength</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="str"
+                                class="ability-list"
+                                [cdkDropListData]="str"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of str" cdkDrag>{{item}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ability-container">
+                        <div class="ability-header">Dexterity</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="dex"
+                                class="ability-list"
+                                [cdkDropListData]="dex"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of dex" cdkDrag>{{item}}</div>
+                            </div>
+                        </div>
+                    </div>    
+                    <div class="ability-container">
+                        <div class="ability-header">Constitution</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="con"
+                                class="ability-list"
+                                [cdkDropListData]="con"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of con" cdkDrag>{{item}}</div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="ability-container">
+                        <div class="ability-header">Intelligence</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="int"
+                                class="ability-list"
+                                [cdkDropListData]="int"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of int" cdkDrag>{{item}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ability-container">
+                        <div class="ability-header">Wisdom</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="wis"
+                                class="ability-list"
+                                [cdkDropListData]="wis"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of wis" cdkDrag>{{item}}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ability-container">
+                        <div class="ability-header">Charisma</div>
+                        <div class="ability-list-container">
+                            <div
+                                cdkDropList
+                                id="cha"
+                                class="ability-list"
+                                [cdkDropListData]="cha"
+                                (cdkDropListDropped)="addAbility($event)">
+                                <div class="ability-box" *ngFor="let item of cha" cdkDrag>{{item}}</div>
+                            </div> 
+                        </div>
+                    </div>  
+                </div>              
+            </div>
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext (click)="saveAbilities()">Next</button>
+            </div>  
+        </form>
+    </mat-step>   
+    <mat-step [stepControl]="descriptionFG" label="Describe your character">
+        <form [formGroup]="descriptionFG">
             <h3>Appearance</h3>
             <mat-form-field appearance="fill">
                 <mat-label>Height</mat-label>
@@ -86,123 +195,86 @@
             </mat-form-field>
             <mat-form-field appearance="fill">
                 <mat-label>Languages</mat-label>
-                <mat-select formControlName="languages" class="form-control"d>
+                <mat-select formControlName="languages" class="form-control">
                     <mat-option *ngFor="let language of languages" [value]="language.name">{{ language.name }}</mat-option>
                 </mat-select>
             </mat-form-field>
             <div>
                 <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
+                <button mat-button matStepperNext (click)="saveDescription()">Next</button>
             </div>
         </form>
-    </mat-step>  
-    <mat-step [stepControl]="thirdFormGroup" label="Determine your ability scores">
-        <form [formGroup]="thirdFormGroup">
-            <div cdkDropListGroup>
-                <div class="ability-array-container">
-                    <h2>Scores</h2>
-                    <div class="ability-score-list-container">
-                        <div
-                            cdkDropList
-                            class="ability-list"
-                            [cdkDropListData]="abilities"
-                            (cdkDropListDropped)="addAbility($event)">
-                            <div class="ability-box" *ngFor="let item of abilities" cdkDrag>{{item}}</div>
-                        </div>
+    </mat-step>   
+    <mat-step [stepControl]="equipmentFG" label="Equip your character">
+        <form [formGroup]="equipmentFG">
+            <div *ngIf=selectedClass.starting_equipment>
+                The {{ selectedClass.name }} starts with the following equipment:
+                <ul *ngFor="let item of selectedClass.starting_equipment">
+                    <li>{{ item.equipment.name }}</li>
+                </ul>
+            </div>
+            <div *ngIf=selectedClass.starting_equipment_options>
+                <div formArrayName="eqOptions">
+                    You also get to choose from the following options:
+                    <div *ngFor="let option of selectedClass.starting_equipment_options; index as idx">
+                        <div>Choose {{ option.choose }} items from the following {{ option.type }}</div>
+                        <mat-button-toggle-group [formControlName]="idx" >
+                            <mat-button-toggle *ngFor="let itemoption of option?.from" [value]="itemoption.equipment?.name">
+                                {{itemoption.equipment.name}}
+                            </mat-button-toggle>
+                        </mat-button-toggle-group>
                     </div>
                 </div>
-                <div class="ability-scores-container">
-                    <h2>Abilities</h2>
-                    <div class="ability-container">
-                        <h3>Strength</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="str"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of str" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <h3>Dexterity</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="dex"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of dex" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>    
-                    <div class="ability-container">
-                        <h3>Constitution</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="con"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of con" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                        <div class="ability-container">
-                        <h3>Intelligence</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="int"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of int" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <h3>Wisdom</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="wis"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of wis" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <h3>Charisma</h3>
-                        <div class="ability-score-list-container">
-                            <div
-                                cdkDropList
-                                class="ability-list"
-                                [cdkDropListData]="cha"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of cha" cdkDrag>{{item}}</div>
-                            </div> 
-                        </div>
-                    </div>  
-                </div>              
+            </div>    
+            <div>
+                <button mat-button matStepperPrevious>Back</button>
+                <button mat-button matStepperNext (click)="saveEquipment()">Next</button>
             </div>
-            <div>
-                <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
-            </div>  
         </form>
-    </mat-step>    
-    
-    <mat-step [stepControl]="fifthFormGroup" label="Equip your character">
-        <form [formGroup]="fifthFormGroup">
-            <mat-form-field appearance="fill">
-                <mat-label>Equipment</mat-label>
-                <input matInput placeholder="equipment" formControlName="equipment" required>
-            </mat-form-field>
+    </mat-step>
+    <mat-step [stepControl]="confirmationFG" label="Confirm you choices">
+        <form [formGroup]="confirmationFG">
+            <table>
+                <tr>
+                    <td>Race</td>
+                    <td> {{ character.race.name }}</td>
+                </tr>
+                <tr>
+                    <td>Class</td>
+                    <td> {{ character.class.name }}</td>
+                </tr>
+                <tr>
+                    <td>Race</td>
+                    <td> {{ character.race.name }}</td>
+                </tr>
+                <tr>
+                    <td>Strength</td>
+                    <td> {{ character.str }}</td>
+                </tr>
+                <tr>
+                    <td>Dexterity</td>
+                    <td> {{ character.dex }}</td>
+                </tr>
+                <tr>
+                    <td>Constituion</td>
+                    <td> {{ character.con }}</td>
+                </tr>
+                <tr>
+                    <td>Intelligence</td>
+                    <td> {{ character.int }}</td>
+                </tr>
+                <tr>
+                    <td>Wisdom</td>
+                    <td> {{ character.wis }}</td>
+                </tr>
+                <tr>
+                    <td>Charisma</td>
+                    <td> {{ character.cha}}</td>
+                </tr>
+            </table>
             <div>
                 <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext>Next</button>
+                <button mat-button matStepperNext>Confirm</button>
             </div>
         </form>
     </mat-step>
@@ -210,13 +282,9 @@
         <ng-template matStepLabel>Done</ng-template>
         <p>You are now done.</p>
         <div>
-        <button mat-button matStepperPrevious>Back</button>
-        <button mat-button (click)="stepper.reset()">Reset</button>
+        <!-- <button mat-button matStepperPrevious>Back</button>
+        <button mat-button (click)="stepper.reset()">Reset</button> -->
         </div>
     </mat-step>
 </mat-stepper>
   
-  
-  <!-- Copyright 2021 Google LLC. All Rights Reserved.
-      Use of this source code is governed by an MIT-style license that
-      can be found in the LICENSE file at http://angular.io/license -->
