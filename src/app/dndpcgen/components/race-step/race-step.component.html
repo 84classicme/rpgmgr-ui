@@ -1,0 +1,14 @@
+<mat-step [stepControl]="raceFG">
+    <form [formGroup]="raceFG">
+    <ng-template matStepLabel>Choose your race</ng-template>
+    <mat-form-field appearance="fill">
+        <mat-label>Race</mat-label>
+        <mat-select formControlName="race" class="form-control" required>
+            <mat-option *ngFor="let race of races" [value]="race.name">{{ race.name }}</mat-option>
+        </mat-select>
+    </mat-form-field>
+    <div>
+        <button mat-button matStepperNext (click)="saveSelection()">Next</button>
+    </div>
+    </form>
+</mat-step>

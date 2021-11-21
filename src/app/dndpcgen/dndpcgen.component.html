@@ -1,31 +1,82 @@
 <mat-stepper orientation="vertical" [linear]="isLinear" #stepper>
+    <!-- <app-race-step (selectedRace)="saveRace  ($event)"></app-race-step> -->
     <mat-step [stepControl]="raceFG">
-        <form [formGroup]="raceFG">
-        <ng-template matStepLabel>Choose your race</ng-template>
-        <mat-form-field appearance="fill">
-            <mat-label>Race</mat-label>
-            <mat-select formControlName="race" class="form-control" required>
-                <mat-option *ngFor="let race of races" [value]="race.name">{{ race.name }}</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <div>
-            <button mat-button matStepperNext (click)="saveRace()">Next</button>
+        <div class="step-container-window">
+            <div class="step-main-window">
+                <form [formGroup]="raceFG">
+                <ng-template matStepLabel>Choose your race</ng-template>
+                <mat-form-field appearance="fill">
+                    <mat-label>Race</mat-label>
+                    <mat-select formControlName="race" class="form-control" (selectionChange)="setSelectedRace($event)" required>
+                        <mat-option *ngFor="let race of races" [value]="race">{{ race.name }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-button matStepperNext (click)="saveRace()">Next</button>
+                </div>
+                </form>
+            </div>
+            <div class="step-detail-window">
+                <div *ngIf="selectedRace?.name">
+                    <table>
+                        <tr>
+                            <td colspan="2">{{ selectedRace.name }} Details</td>
+                        </tr>
+                        <tr>
+                            <td>Speed</td>
+                            <td> {{ selectedRace.speed }}</td>
+                        </tr>
+                        <tr>
+                            <td>Alignmnet</td>
+                            <td> {{ selectedRace.alignment }}</td>
+                        </tr>
+                        <tr>
+                            <td>Age</td>
+                            <td> {{ selectedRace.age }}</td>
+                        </tr>
+                        <tr>
+                            <td>Size</td>
+                            <td> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
+                        </tr>
+                        <tr>
+                            <td>Languages</td>
+                            <td> {{ selectedRace.language_desc }} </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        </form>
     </mat-step>
     <mat-step [stepControl]="classFG" label="Choose your class">
-        <form [formGroup]="classFG">
-        <mat-form-field appearance="fill">
-            <mat-label>Class</mat-label>
-            <mat-select formControlName="class" class="form-control" required>
-                <mat-option *ngFor="let class of classes" [value]="class.name">{{ class.name }}</mat-option>
-            </mat-select>
-        </mat-form-field>
-        <div>
-            <button mat-button matStepperPrevious>Back</button>
-            <button mat-button matStepperNext (click)="saveClass()">Next</button>
+        <div class="step-container-window">
+            <div class="step-main-window">
+                <form [formGroup]="classFG">
+                <mat-form-field appearance="fill">
+                    <mat-label>Class</mat-label>
+                    <mat-select formControlName="class" class="form-control" (selectionChange)="setSelectedClass($event)" required>
+                        <mat-option *ngFor="let class of classes" [value]="class">{{ class.name }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div>
+                    <button mat-button matStepperPrevious>Back</button>
+                    <button mat-button matStepperNext (click)="saveClass()">Next</button>
+                </div>
+                </form>
+            </div>
+            <div class="step-detail-window">
+                <div *ngIf="selectedClass?.name">
+                    <table>
+                        <tr>
+                            <td colspan="2">{{ selectedClass.name }} Details</td>
+                        </tr>
+                        <tr>
+                            <td>Hit Die</td>
+                            <td> {{ selectedClass.hit_die }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
         </div>
-        </form>
     </mat-step>
     <mat-step [stepControl]="abilitiesFG" label="Determine your ability scores">
         <form [formGroup]="abilitiesFG">
@@ -207,16 +258,16 @@
     </mat-step>   
     <mat-step [stepControl]="equipmentFG" label="Equip your character">
         <form [formGroup]="equipmentFG">
-            <div *ngIf=selectedClass.starting_equipment>
-                The {{ selectedClass.name }} starts with the following equipment:
-                <ul *ngFor="let item of selectedClass.starting_equipment">
+            <div *ngIf="character.class.starting_equipment.length > 0">
+                The {{ character.class.name }} starts with the following equipment:
+                <ul *ngFor="let item of character.class.starting_equipment">
                     <li>{{ item.equipment.name }}</li>
                 </ul>
             </div>
-            <div *ngIf=selectedClass.starting_equipment_options>
+            <div *ngIf="character.class.starting_equipment_options.length > 0">
                 <div formArrayName="eqOptions">
-                    You also get to choose from the following options:
-                    <div *ngFor="let option of selectedClass.starting_equipment_options; index as idx">
+                    Choose from the following equipment options:
+                    <div *ngFor="let option of character.class.starting_equipment_options; index as idx">
                         <div>Choose {{ option.choose }} items from the following {{ option.type }}</div>
                         <mat-button-toggle-group [formControlName]="idx" >
                             <mat-button-toggle *ngFor="let itemoption of option?.from" [value]="itemoption.equipment?.name">

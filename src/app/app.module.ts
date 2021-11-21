@@ -19,6 +19,7 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import {MaterialExampleModule} from '../material.module';
 import { StoreModule } from '@ngrx/store';
+import { RaceStepComponent } from './dndpcgen/components/race-step/race-step.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,6 +27,7 @@ import { StoreModule } from '@ngrx/store';
     PF2SpellsComponent,
     AdminComponent,
     DndpcgenComponent,
+    RaceStepComponent,
   ],
   imports: [
     BrowserModule,
@@ -55,7 +57,8 @@ import { StoreModule } from '@ngrx/store';
     MatInputModule,
     MatStepperModule,
     MatIconModule,
-    MatSelectModule
+    MatSelectModule,
+    RaceStepComponent,
   ],
   providers: [],
   bootstrap: [ AppComponent ]

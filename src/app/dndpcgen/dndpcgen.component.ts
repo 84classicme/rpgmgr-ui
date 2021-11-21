@@ -12,6 +12,7 @@ import { Character } from './character';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
+import { RaceStepComponent } from './components/race-step/race-step.component';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -96,7 +97,7 @@ languages: []
 })
 export class DndpcgenComponent implements OnInit {
 
-  character: Character = initialState;
+  character: Character;
 
   races: Race[] = [];
   selectedRace: Race = EMPTY_RACE;
@@ -130,6 +131,7 @@ export class DndpcgenComponent implements OnInit {
  }
   
   constructor(private store: Store<Character>, private dndpcgenserviceService: DndpcgenserviceService, private _formBuilder: FormBuilder) { 
+    this.character = initialState;
     this.raceFG = this._formBuilder.group({
       race: ['', Validators.required]
     });
@@ -161,6 +163,7 @@ export class DndpcgenComponent implements OnInit {
   }
 
     ngOnInit(): void {
+      this.eqOptions.clear();
       this.getRaces();
       this.getClasses();
       this.getSkills();
@@ -170,8 +173,20 @@ export class DndpcgenComponent implements OnInit {
       this.getAlignments();
     }
 
+    setSelectedRace(event: any){
+      if(this.raceFG.value.race){
+        console.log("setting selectedRace..." + event);
+        this.selectedRace = event.value;
+      }
+    }
+
+    // saveRace(): void {
+    //   this.character.race = this.selectedRace;
+    // }
+
+
     saveRace(): void {
-      if(this.raceFG.touched && this.raceFG.value.race){
+      if(this.raceFG.value.race){
         let selected = this.races.filter(race => race.name === this.raceFG.value.race);
         if(selected.length === 1) {
           let myrace: Race = selected[0];
@@ -180,22 +195,46 @@ export class DndpcgenComponent implements OnInit {
       }
     }
 
-    saveClass() {
-      if(this.classFG.touched && this.classFG.value.class){
-        let selected = this.classes.filter(myclass => myclass.name === this.classFG.value.class);
-        if(selected.length === 1) {
-          let myclass: Class = selected[0];
-          this.selectedClass = myclass;
-          this.character.class = myclass;
-          let index = 1;
-          this.eqOptions.clear();
-          myclass.starting_equipment_options.forEach(option => {
-            this.eqOptions.push(new FormControl(index.toString())); 
-            index++;
-          })
-        }
+    setSelectedClass(event: any){
+      if(this.classFG.value.class){
+        console.log("setting selectedClass..." + event);
+        this.selectedClass = event.value;
       }
     }
+
+    saveClass() {
+      this.character.class = this.selectedClass;
+      let index = 1;
+      this.eqOptions.clear();
+      this.selectedClass.starting_equipment_options.forEach(option => {
+        this.eqOptions.push(new FormControl(index.toString())); 
+        index++;
+      })
+    }
+      // if(this.classFG.value.class){
+      //   let selected = this.classes.filter(myclass => myclass.name === this.classFG.value.class);
+      //   if(selected.length === 1) {
+      //     let myclass: Class = selected[0];
+      //     this.selectedClass = myclass;
+      //     this.character.class = myclass;
+      //     let index = 1;
+      //     this.eqOptions.clear();
+      //     myclass.starting_equipment_options.forEach(option => {
+      //       this.eqOptions.push(new FormControl(index.toString())); 
+      //       index++;
+      //     })
+      //   }
+      // }
+    //}
+
+    // saveClass() {
+    //   this.character.class = this.selectedClass;
+    //   let index = 1;
+    //   this.character.class.starting_equipment_options.forEach(option => {
+    //     this.eqOptions.push(new FormControl(index.toString()));  // add choices to equimentFG
+    //     index++;
+    //   })
+    // }
 
     saveAbilities(){
       this.character.str = this.str[0];
