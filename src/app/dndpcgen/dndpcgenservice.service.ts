@@ -9,6 +9,7 @@ import { Skill } from '../shared/dnd/skill';
 import { Proficiency } from '../shared/dnd/proficiency';
 import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
+import { Level } from '../shared/dnd/level';
 
 // const EMPTY_CHARACTER: Character = {
 //   name: '',
@@ -36,6 +37,7 @@ export class DndpcgenserviceService {
   private proficiencyurl = 'http://localhost:8080/dnd/proficiencies';
   private languageurl = 'http://localhost:8080/dnd/languages';
   private alignmenturl = 'http://localhost:8080/dnd/alignments';
+
   // character: Character;
 
 
@@ -77,5 +79,9 @@ export class DndpcgenserviceService {
 
   getAlignments(): Observable<Alignment[]> {
     return this.http.get<Alignment[]>(this.alignmenturl)
+  }
+
+  getLevelsByClass(cclass: string): Observable<Level[]> {
+    return this.http.get<Level[]>(`${this.classurl}/${cclass}/levels`);
   }
 }

@@ -20,30 +20,30 @@
                 <div *ngIf="selectedRace">
                     <table>
                         <tr>
-                            <td colspan="2">{{ selectedRace.name }} Details</td>
+                            <th colspan="2">Details</th>
                         </tr>
                         <tr>
-                            <td>Speed</td>
+                            <th>Speed</th>
                             <td> {{ selectedRace.speed }}</td>
                         </tr>
                         <tr>
-                            <td>Alignmnet</td>
+                            <th>Alignment</th>
                             <td> {{ selectedRace.alignment }}</td>
                         </tr>
                         <tr>
-                            <td>Age</td>
+                            <th>Age</th>
                             <td> {{ selectedRace.age }}</td>
                         </tr>
                         <tr>
-                            <td>Size</td>
+                            <th>Size</th>
                             <td> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
                         </tr>
                         <tr>
-                            <td>Languages</td>
+                            <th>Languages</th>
                             <td> {{ selectedRace.language_desc }} </td>
                         </tr>
                         <tr *ngIf="selectedRace.starting_proficiencies.length > 0">
-                            <td>Starting Proficiencies</td>
+                            <th>Starting Proficiencies</th>
                             <td> 
                                 <div *ngFor="let proficiency of selectedRace.starting_proficiencies">
                                     {{ proficiency.name }}
@@ -51,7 +51,7 @@
                             </td>
                         </tr>
                         <tr *ngIf="selectedRace.traits.length > 0">
-                            <td>Traits</td>
+                            <th>Traits</th>
                             <td> 
                                 <div *ngFor="let trait of selectedRace.traits">
                                     {{ trait.name }}
@@ -69,7 +69,7 @@
                 <form [formGroup]="classFG">
                 <mat-form-field appearance="fill">
                     <mat-label>Class</mat-label>
-                    <mat-select formControlName="class" class="form-control" [(value)]="selectedClass" required>
+                    <mat-select formControlName="class" class="form-control" [(value)]="selectedClass" (selectionChange)="getLevels($event)" required>
                         <mat-option *ngFor="let class of classes" [value]="class">{{ class.name }}</mat-option>
                     </mat-select>
                 </mat-form-field>
@@ -80,17 +80,17 @@
                 </form>
             </div>
             <div class="step-detail-window">
-                <div *ngIf="selectedClass">
+                <div *ngIf="selectedClass.hit_die">
                     <table>
                         <tr>
-                            <td colspan="2">{{ selectedClass.name }} Details</td>
+                            <th colspan="2">Details</th>
                         </tr>
                         <tr>
-                            <td>Hit Die</td>
+                            <th>Hit Die</th>
                             <td> {{ selectedClass.hit_die }}</td>
                         </tr>
                         <tr>
-                            <td>Saving Throws</td>
+                            <th>Saving Throws</th>
                             <td> 
                                 <div *ngFor="let save of selectedClass.saving_throws">
                                     {{ save.name }}
@@ -98,24 +98,58 @@
                             </td>
                         </tr>
                         <tr *ngIf="selectedClass.proficiencies.length > 0">
-                            <td>Starting Proficiencies</td>
+                            <th>Proficiencies</th>
                             <td> 
                                 <div *ngFor="let proficiency of selectedClass.proficiencies">
                                     {{ proficiency.name }}
                                 </div>
                             </td>
                         </tr>
-                        <tr *ngIf="selectedClass.starting_equipment.length > 0">
-                            <td>Equipment</td>
+                        <tr *ngIf="selectedClass.proficiencies.length > 0">
+                            <th>Proficiencies</th>
                             <td> 
-                                <div *ngFor="let item of selectedClass.starting_equipment">
-                                    {{ item.equipment.name }}
+                                <div *ngFor="let proficiency of selectedClass.proficiencies">
+                                    {{ proficiency.name }}
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedClass.proficiency_choices.length > 0">
+                            <th>Skills</th>
+                            <td> 
+                                <div *ngFor="let choice of selectedClass.proficiency_choices">
+                                    {{ choice.choose }} from the following:
+                                    <div *ngFor="let option of choice.from">
+                                        {{ option.name | stripSkill }}
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     </table>
                 </div>
             </div>
+            <div *ngIf="selectedClass.levels.length">    
+                <table>
+                    <tr>    
+                        <th colspan="2">Features by Level</th>
+                    </tr>  
+                    <div *ngIf="selectedClass.levels.length > 0">
+                        <div *ngFor="let level of selectedClass.levels">
+                            <div *ngIf="level.features.length">
+                                <tr>
+                                    <th>
+                                        {{ level.level }}
+                                    </th>
+                                    <td> 
+                                        <div *ngFor="let feature of level.features">
+                                            {{ feature.name  }}
+                                        </div>
+                                    </td>
+                                </tr>
+                            </div>
+                        </div>
+                    </div>
+                </table>
+            </div>           
         </div>
     </mat-step>
     <mat-step [stepControl]="abilitiesFG" label="Determine your ability scores">

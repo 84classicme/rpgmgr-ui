@@ -20,6 +20,7 @@ import { AppRoutingModule } from './app-routing.module';
 import {MaterialExampleModule} from '../material.module';
 import { StoreModule } from '@ngrx/store';
 import { RaceStepComponent } from './dndpcgen/components/race-step/race-step.component';
+import { StripSkillPipe } from './dndpcgen/strip-skill.pipe';
 @NgModule({
   declarations: [
     AppComponent,
@@ -28,6 +29,7 @@ import { RaceStepComponent } from './dndpcgen/components/race-step/race-step.com
     AdminComponent,
     DndpcgenComponent,
     RaceStepComponent,
+    StripSkillPipe,
   ],
   imports: [
     BrowserModule,

@@ -12,12 +12,13 @@ import { Character } from './character';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
-import { RaceStepComponent } from './components/race-step/race-step.component';
+import { Level } from '../shared/dnd/level';
 
 const EMPTY_CLASS: Class = {
   index: '',
   name: '',
   hit_die: 0,
+  levels: [],
   proficiency_choices: [],
   proficiencies: [],
   saving_throws: [],
@@ -98,11 +99,12 @@ languages: []
 export class DndpcgenComponent implements OnInit {
 
   character: Character;
-
+ 
   races: Race[] = [];
   selectedRace?: Race;
   classes: Class[] = [];
-  selectedClass?: Class;
+  selectedClass: Class = EMPTY_CLASS;
+  levels: Level[] = [];
   skills: Proficiency[] = []; //TYPE: "Skills"
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
   others: Proficiency[] = []; //TYPE: "Other"
@@ -179,6 +181,14 @@ export class DndpcgenComponent implements OnInit {
       }
     }
 
+    getLevels(myclass: any){
+      console.log("Getting levels....");
+      this.getLevelsForClass(myclass.value.name);
+      // if(this.selectedClass){
+      //   this.selectedClass.levels = this.levels;
+      // }
+    }
+
     saveClass() {
       if(this.selectedClass){
         this.character.class = this.selectedClass;
@@ -239,39 +249,15 @@ export class DndpcgenComponent implements OnInit {
 
       this.character.proficiencies = [];
       this.character.languages = [];
-
       this.descriptionFG.value.artisantools.forEach((artisantool: string)  => {
         this.character.proficiencies.push(artisantool); 
       });
-
       this.descriptionFG.value.othertools.forEach((othertool: string) => {
         this.character.proficiencies.push(othertool); 
       });
-
       this.descriptionFG.value.languages.forEach((language: string) => {
         this.character.languages.push(language); 
       });
-
-      // let selected = this.tools.filter(tool => tool.name === this.descriptionFG.value.artisantools);
-      //   if(selected.length === 1) {
-      //     let myprof: Proficiency = selected[0];
-      //     this.character.proficiencies.push(myprof.name); 
-      // }
-      // selected = this.others.filter(tool => tool.name === this.descriptionFG.value.othertools);
-      // if(selected.length === 1) {
-      //   let myprof: Proficiency = selected[0];
-      //   this.character.proficiencies.push(myprof.name); 
-      // }  
-      // let selectedlangs = this.languages.filter(language => language.name === this.descriptionFG.value.languages);
-      
-      // this.character.race.languages.forEach(lang => {
-      //   this.character.languages.push(lang.name);
-      // })
-      // if(selectedlangs.length === 1) {
-      //   let mylang: Language = selectedlangs[0];
-      //   this.character.languages.push(mylang.name); 
-      // }
-
     }
 
     saveEquipment(){
@@ -321,6 +307,12 @@ export class DndpcgenComponent implements OnInit {
           .subscribe(alignments => this.alignments = alignments);
     }
 
-    
-
+    getLevelsForClass(cclass: string): void {
+      this.levels = [];
+      this.dndpcgenserviceService.getLevelsByClass(cclass)
+          .subscribe(levels => {
+            this.levels = levels;
+            this.selectedClass.levels = levels;
+          });
+    }
 }

@@ -1,5 +1,6 @@
 import { Equipment } from "./equipment";
 import { EquipmentOption } from "./equipmentoption";
+import { Level } from "./level";
 import { Multiclassing } from "./multiclassing";
 import { OptionsTrinity } from './optiontrinity'
 import { ValueTrinity } from "./valuetrinity";
@@ -8,6 +9,7 @@ export interface Class {
     index: string;
     name: string;
     hit_die: number;
+    levels: Level[]; 
     proficiency_choices: OptionsTrinity[];
     proficiencies: ValueTrinity[];
     saving_throws: ValueTrinity[];
