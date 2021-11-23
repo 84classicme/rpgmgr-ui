@@ -3,6 +3,53 @@
   min-width: 400px
 }
 
+.step-detail-window {
+  margin-left: 10px;
+  padding-top: 20px
+}
+
+/* .step-table{
+  border: 1px solid #369;
+  border-collapse: collapse;
+} */
+
+.step-table-row-header{
+  max-width: 150px;
+  max-block-size: 150px;
+  max-inline-size: 150px;
+  font: bold;
+  background-color:rgb(150, 185, 218);
+  /* border-collapse: collapse; */
+  padding: 5px;
+  margin: 3px;
+}
+
+.step-table-row{
+  max-width: 500px;
+  max-block-size: 500px;
+  max-inline-size: 500px;
+  background-color: whitesmoke;
+  /* border: 1px solid rgb(150, 185, 218);
+  border-collapse: collapse; */
+  padding: 5px;
+  margin: 3px;
+}
+
+.level-table-header{
+  font: bold;
+  background-color:rgb(150, 185, 218);
+  padding: 5px;
+  margin: 3px;
+}
+
+.odd {
+  background-color: whitesmoke;
+}
+
+.even {
+  background-color:  rgb(150, 185, 218);
+}
+
 .mat-stepper-horizontal {
   margin-top: 8px;
 }
@@ -46,7 +93,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: #fff;
+  background: whitesmoke;
   border-radius: 4px;
   position: relative;
   z-index: 1;
@@ -73,10 +120,10 @@
 
 .ability-array-list {
   border: solid 1px #ccc;
-  min-height: 120px;
+  min-height: 180px;
   width: 40px;
   padding: 5px;
-  background: white;
+  background: rgb(150, 185, 218);
   border-radius: 4px;
   overflow: hidden;
   display: block;
@@ -88,7 +135,7 @@
   align-items: center;
   width: 40px;
   min-height: 40px;
-  background: white;
+  background: rgb(150, 185, 218);
   border-radius: 4px;
   overflow: hidden;
   padding: 5px;

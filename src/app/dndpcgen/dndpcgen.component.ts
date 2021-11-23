@@ -12,7 +12,7 @@ import { Character } from './character';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
-import { Level } from '../shared/dnd/level';
+import { Level, LevelSpellcasting } from '../shared/dnd/level';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -308,9 +308,10 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getLevelsForClass(cclass: string): void {
-      this.levels = [];
+      
       this.dndpcgenserviceService.getLevelsByClass(cclass)
           .subscribe(levels => {
+            this.levels = [];
             this.levels = levels;
             this.selectedClass.levels = levels;
           });

@@ -18,44 +18,42 @@
             </div>
             <div class="step-detail-window">
                 <div *ngIf="selectedRace">
-                    <table>
+                    <table class='step-table'>
                         <tr>
-                            <th colspan="2">Details</th>
+                            <th class='step-table-row-header'>Speed</th>
+                            <td class='table-row'> {{ selectedRace.speed }}</td>
                         </tr>
                         <tr>
-                            <th>Speed</th>
-                            <td> {{ selectedRace.speed }}</td>
+                            <th class='step-table-row-header'>Alignment</th>
+                            <td class='step-table-row'> {{ selectedRace.alignment }}</td>
                         </tr>
                         <tr>
-                            <th>Alignment</th>
-                            <td> {{ selectedRace.alignment }}</td>
+                            <th class='step-table-row-header'>Age</th>
+                            <td class='step-table-row'> {{ selectedRace.age }}</td>
                         </tr>
                         <tr>
-                            <th>Age</th>
-                            <td> {{ selectedRace.age }}</td>
+                            <th class='step-table-row-header'>Size</th>
+                            <td class='step-table-row'> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
                         </tr>
                         <tr>
-                            <th>Size</th>
-                            <td> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
-                        </tr>
-                        <tr>
-                            <th>Languages</th>
-                            <td> {{ selectedRace.language_desc }} </td>
+                            <th class='step-table-row-header'>Languages</th>
+
+                            <td class='step-table-row'> {{ selectedRace.language_desc }} </td>
                         </tr>
                         <tr *ngIf="selectedRace.starting_proficiencies.length > 0">
-                            <th>Starting Proficiencies</th>
-                            <td> 
+                            <th class='step-table-row-header'>Starting Proficiencies</th>
+                            <td class='step-table-row'> 
                                 <div *ngFor="let proficiency of selectedRace.starting_proficiencies">
                                     {{ proficiency.name }}
                                 </div>
                             </td>
                         </tr>
                         <tr *ngIf="selectedRace.traits.length > 0">
-                            <th>Traits</th>
-                            <td> 
-                                <div *ngFor="let trait of selectedRace.traits">
+                            <th class='step-table-row-header'>Traits</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let trait of selectedRace.traits">
                                     {{ trait.name }}
-                                </div>
+                                </span>
                             </td>
                         </tr>
                     </table>
@@ -81,41 +79,30 @@
             </div>
             <div class="step-detail-window">
                 <div *ngIf="selectedClass.hit_die">
-                    <table>
+                    <table class='step-table'>
                         <tr>
-                            <th colspan="2">Details</th>
+                            <th class='step-table-row-header'>Hit Die</th>
+                            <td class='step-table-row'> {{ selectedClass.hit_die }}</td>
                         </tr>
                         <tr>
-                            <th>Hit Die</th>
-                            <td> {{ selectedClass.hit_die }}</td>
-                        </tr>
-                        <tr>
-                            <th>Saving Throws</th>
-                            <td> 
+                            <th class='step-table-row-header'>Saving Throws</th>
+                            <td class='step-table-row'> 
                                 <div *ngFor="let save of selectedClass.saving_throws">
                                     {{ save.name }}
                                 </div>
                             </td>
                         </tr>
                         <tr *ngIf="selectedClass.proficiencies.length > 0">
-                            <th>Proficiencies</th>
-                            <td> 
-                                <div *ngFor="let proficiency of selectedClass.proficiencies">
-                                    {{ proficiency.name }}
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="selectedClass.proficiencies.length > 0">
-                            <th>Proficiencies</th>
-                            <td> 
+                            <th class='step-table-row-header'>Proficiencies</th>
+                            <td class='step-table-row'> 
                                 <div *ngFor="let proficiency of selectedClass.proficiencies">
                                     {{ proficiency.name }}
                                 </div>
                             </td>
                         </tr>
                         <tr *ngIf="selectedClass.proficiency_choices.length > 0">
-                            <th>Skills</th>
-                            <td> 
+                            <th class='step-table-row-header'>Skills</th>
+                            <td class='step-table-row'> 
                                 <div *ngFor="let choice of selectedClass.proficiency_choices">
                                     {{ choice.choose }} from the following:
                                     <div *ngFor="let option of choice.from">
@@ -127,27 +114,79 @@
                     </table>
                 </div>
             </div>
-            <div *ngIf="selectedClass.levels.length">    
+            <div class="step-detail-window" *ngIf="selectedClass.levels?.length">    
                 <table>
-                    <tr>    
-                        <th colspan="2">Features by Level</th>
-                    </tr>  
-                    <div *ngIf="selectedClass.levels.length > 0">
-                        <div *ngFor="let level of selectedClass.levels">
-                            <div *ngIf="level.features.length">
-                                <tr>
-                                    <th>
-                                        {{ level.level }}
-                                    </th>
-                                    <td> 
-                                        <div *ngFor="let feature of level.features">
-                                            {{ feature.name  }}
-                                        </div>
-                                    </td>
-                                </tr>
+                    <tr>
+                        <th class="level-table-header">Level</th>
+                        <th class="level-table-header">Bonus</th>
+                        <th class="level-table-header">Features</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.cantrips_known != null" class="level-table-header">Cantrips</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting &&
+                            selectedClass.levels[0].spellcasting.spells_known != null" class="level-table-header">Spells</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting &&
+                            selectedClass.levels[0].spellcasting.spell_slots_level_1 != null" class="level-table-header">1st</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_2 != null" class="level-table-header">2nd</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_3 != null" class="level-table-header">3rd</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_4 != null" class="level-table-header">4th</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_5 != null" class="level-table-header">5th</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_6 != null" class="level-table-header">6th</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_7 != null" class="level-table-header">7th</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_8 != null" class="level-table-header">8th</th>
+                        <th *ngIf="selectedClass.levels[0].spellcasting && 
+                            selectedClass.levels[0].spellcasting.spell_slots_level_9 != null" class="level-table-header">9th</th>
+                    </tr>
+                    <tr *ngFor="let level of selectedClass.levels; let even = even; let odd = odd" [ngClass]="{ odd: odd, even: even }">        
+                        <td>
+                            {{ level.level }}
+                        </td>
+                        <td>{{ level.prof_bonus }}</td>
+                        <td> 
+                            <div *ngFor="let feature of level.features">
+                                {{ feature.name  }}
                             </div>
-                        </div>
-                    </div>
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.cantrips_known != null"> 
+                            {{ level.spellcasting?.cantrips_known }}
+                        </td>  
+                        <td *ngIf="level.spellcasting && level.spellcasting.spells_known != null">
+                            {{ level.spellcasting.spells_known }}
+                        </td>     
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_1 != null">
+                            {{ level.spellcasting.spell_slots_level_1 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_2 != null">
+                            {{ level.spellcasting.spell_slots_level_2 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_3 != null">
+                            {{ level.spellcasting.spell_slots_level_3 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_4 != null">
+                            {{ level.spellcasting.spell_slots_level_4 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_5 != null">
+                            {{ level.spellcasting.spell_slots_level_5 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_6 != null">
+                            {{ level.spellcasting.spell_slots_level_6 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_7 != null">
+                            {{ level.spellcasting.spell_slots_level_7 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_8 != null">
+                            {{ level.spellcasting.spell_slots_level_8 }}
+                        </td>
+                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_9 != null">
+                            {{ level.spellcasting.spell_slots_level_9 }}
+                        </td>                      
+                    </tr>
                 </table>
             </div>           
         </div>
