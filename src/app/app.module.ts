@@ -21,6 +21,7 @@ import {MaterialExampleModule} from '../material.module';
 import { StoreModule } from '@ngrx/store';
 import { RaceStepComponent } from './dndpcgen/components/race-step/race-step.component';
 import { StripSkillPipe } from './dndpcgen/strip-skill.pipe';
+import { FeatureModalComponent } from './shared/feature-modal/feature-modal.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -30,6 +31,7 @@ import { StripSkillPipe } from './dndpcgen/strip-skill.pipe';
     DndpcgenComponent,
     RaceStepComponent,
     StripSkillPipe,
+    FeatureModalComponent,
   ],
   imports: [
     BrowserModule,

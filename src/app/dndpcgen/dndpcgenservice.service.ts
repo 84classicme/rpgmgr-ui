@@ -10,6 +10,7 @@ import { Proficiency } from '../shared/dnd/proficiency';
 import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
 import { Level } from '../shared/dnd/level';
+import { Feature } from '../shared/dnd/feature';
 
 // const EMPTY_CHARACTER: Character = {
 //   name: '',
@@ -37,17 +38,12 @@ export class DndpcgenserviceService {
   private proficiencyurl = 'http://localhost:8080/dnd/proficiencies';
   private languageurl = 'http://localhost:8080/dnd/languages';
   private alignmenturl = 'http://localhost:8080/dnd/alignments';
+  private featureurl = 'http://localhost:8080/dnd/features';
+  private abilityurl = 'http://localhost:8080/dnd/ability-scores';
 
-  // character: Character;
 
 
-  constructor(private http: HttpClient) {
-    // this.character = this.getEmptyCharacter();
-   }
-
-  // private getEmptyCharacter(){
-  //   return EMPTY_CHARACTER;
-  // }
+  constructor(private http: HttpClient) {}
 
   getRaces(): Observable<Race[]> {
     return this.http.get<Race[]>(this.raceurl)
@@ -83,5 +79,13 @@ export class DndpcgenserviceService {
 
   getLevelsByClass(cclass: string): Observable<Level[]> {
     return this.http.get<Level[]>(`${this.classurl}/${cclass}/levels`);
+  }
+
+  getFeatureDescription(index: string): Observable<Feature> {
+    return this.http.get<Feature>(`${this.featureurl}/${index}`);
+  }
+
+  getAbilityDescription(index: string): Observable<Feature> {
+    return this.http.get<Feature>(`${this.abilityurl}/${index}`);
   }
 }

@@ -7,12 +7,14 @@ import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/dr
 import { Proficiency } from '../shared/dnd/proficiency';
 import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
-import { Store } from '@ngrx/store';
 import { Character } from './character';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
 import { Level, LevelSpellcasting } from '../shared/dnd/level';
+import { Feature } from '../shared/dnd/feature';
+import { MatDialog } from '@angular/material/dialog';
+import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -104,6 +106,7 @@ export class DndpcgenComponent implements OnInit {
   selectedRace?: Race;
   classes: Class[] = [];
   selectedClass: Class = EMPTY_CLASS;
+  feature?: Feature;
   levels: Level[] = [];
   skills: Proficiency[] = []; //TYPE: "Skills"
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
@@ -132,7 +135,11 @@ export class DndpcgenComponent implements OnInit {
     return this.equipmentFG.get('eqOptions') as FormArray; 
  }
   
-  constructor(private store: Store<Character>, private dndpcgenserviceService: DndpcgenserviceService, private _formBuilder: FormBuilder) { 
+  constructor(
+    private dndpcgenserviceService: DndpcgenserviceService, 
+    private _formBuilder: FormBuilder,
+    public dialog: MatDialog) { 
+
     this.character = initialState;
     this.raceFG = this._formBuilder.group({
       race: ['', Validators.required]
@@ -184,9 +191,6 @@ export class DndpcgenComponent implements OnInit {
     getLevels(myclass: any){
       console.log("Getting levels....");
       this.getLevelsForClass(myclass.value.name);
-      // if(this.selectedClass){
-      //   this.selectedClass.levels = this.levels;
-      // }
     }
 
     saveClass() {
@@ -308,12 +312,23 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getLevelsForClass(cclass: string): void {
-      
       this.dndpcgenserviceService.getLevelsByClass(cclass)
           .subscribe(levels => {
             this.levels = [];
             this.levels = levels;
             this.selectedClass.levels = levels;
           });
+    }
+
+    getFeatureDetails(index: any): void{
+      console.log('Getting feature for ' + index + '...')
+      this.dndpcgenserviceService.getFeatureDescription(index)
+      .subscribe(feature => { 
+        this.feature = feature;
+        const dialogRef = this.dialog.open(FeatureModalComponent, {
+          width: '400px',
+          data: this.feature
+        });
+      });
     }
 }

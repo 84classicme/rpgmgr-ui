@@ -42,6 +42,10 @@
   margin: 3px;
 }
 
+.level-table-row{
+  text-align: center;
+}
+
 .odd {
   background-color: whitesmoke;
 }
@@ -58,29 +62,60 @@
   margin-top: 16px;
 }
 
-.ability-array-container {
-  width: 100px;
+.abilities-container{
+  width: 200px;
+  min-height: 400px;
   max-width: 100%;
-  margin: 0 25px 25px 0;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.ability-container-header {
-  font-size: large;
-  align-content: center;
-}
-
-.ability-header {
-  font-size: large;
-  align-content: center;
-}
-
-.ability-list-container {
   display: flex;
-  max-width: 100%;
-  margin: 0 22px 22px 0;
+  justify-content: center;
+  align-items: center;
 }
+
+.abilities-pool{
+  width: 160px;
+  height: 210px;
+  justify-items: center;
+  display: grid;
+}
+
+.abilities-final{
+  width: 120px;
+  min-height: 100px;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+
+.abilities-array {
+  min-height: 180px;
+  width: 40px;
+  background: rgb(150, 185, 218);
+  display: grid;
+  justify-content: center;
+  align-content: baseline;
+  
+}
+
+.abilities-score {
+  width: 50px;
+  height: 50px;
+  background: rgb(150, 185, 218);
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  margin-bottom: 18px;
+}
+
+.abilities-header{
+  width: 100px;
+  height: 20px;
+  text-align: center;
+}
+
+/* .ability-box{
+background: white;
+width: 20px;
+} */
 
 .ability-box {
   width: 20px;
@@ -102,6 +137,42 @@
               0 2px 2px 0 rgba(0, 0, 0, 0.14),
               0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
+
+.ability-box:active {
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+              0 8px 10px 1px rgba(0, 0, 0, 0.14),
+              0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+
+
+
+/* 
+.ability-array-container {
+  width: 100px;
+  max-width: 100%;
+  margin: 0 25px 25px 0;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.ability-container-header {
+  font-size: large;
+  text-align: center;
+}
+
+.ability-header {
+  font-size: large;
+  text-align: center;
+}
+
+.ability-list-container {
+  display: flex;
+  max-width: 100%;
+  margin: 0 22px 22px 0;
+}
+
+
 .ability-scores-container {
   width: 400px;
   max-width: 100%;
@@ -140,9 +211,4 @@
   overflow: hidden;
   padding: 5px;
 }
-
-.ability-box:active {
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-              0 8px 10px 1px rgba(0, 0, 0, 0.14),
-              0 3px 14px 2px rgba(0, 0, 0, 0.12);
-}
+ */

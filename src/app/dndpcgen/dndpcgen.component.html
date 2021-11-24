@@ -21,7 +21,7 @@
                     <table class='step-table'>
                         <tr>
                             <th class='step-table-row-header'>Speed</th>
-                            <td class='table-row'> {{ selectedRace.speed }}</td>
+                            <td class='step-table-row'> {{ selectedRace.speed }}</td>
                         </tr>
                         <tr>
                             <th class='step-table-row-header'>Alignment</th>
@@ -104,7 +104,7 @@
                             <th class='step-table-row-header'>Skills</th>
                             <td class='step-table-row'> 
                                 <div *ngFor="let choice of selectedClass.proficiency_choices">
-                                    {{ choice.choose }} from the following:
+                                    <h5>Choice of {{ choice.choose }}:</h5>
                                     <div *ngFor="let option of choice.from">
                                         {{ option.name | stripSkill }}
                                     </div>
@@ -143,13 +143,15 @@
                         <th *ngIf="selectedClass.levels[0].spellcasting && 
                             selectedClass.levels[0].spellcasting.spell_slots_level_9 != null" class="level-table-header">9th</th>
                     </tr>
-                    <tr *ngFor="let level of selectedClass.levels; let even = even; let odd = odd" [ngClass]="{ odd: odd, even: even }">        
+                    <tr class="level-table-row" *ngFor="let level of selectedClass.levels; let even = even; let odd = odd" [ngClass]="{ odd: odd, even: even }">        
                         <td>
                             {{ level.level }}
                         </td>
-                        <td>{{ level.prof_bonus }}</td>
+                        <td>
+                            +{{ level.prof_bonus }}
+                        </td>
                         <td> 
-                            <div *ngFor="let feature of level.features">
+                            <div *ngFor="let feature of level.features" (click)='getFeatureDetails(feature.index)'>
                                 {{ feature.name  }}
                             </div>
                         </td>
@@ -200,99 +202,75 @@
             <input matInput formControlName="wis" hidden>
             <input matInput formControlName="cha" hidden>
             <div cdkDropListGroup>
-                <div class="ability-array-container">
-                    <div class="ability-container-header">Scores</div> 
-                    <div class="ability-list-container">
+                <div class="abilities-container">
+                    <div class="abilities-pool">
+                        <div class="abilities-header">Scores</div>
                         <div
                             cdkDropList
                             id="array"
-                            class="ability-array-list"
+                            class="abilities-array"
                             [cdkDropListData]="abilities"
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of abilities" cdkDrag>{{item}}</div>
                         </div>
                     </div>
+                    <div class="abilities-final">
+                        <div class="abilities-header">Strength</div>                            
+                        <div
+                            cdkDropList
+                            id="str"
+                            class="abilities-score"
+                            [cdkDropListData]="str"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of str" cdkDrag>{{item}}</div>
+                        </div>
+                        <div class="abilities-header">Dexterity</div>                            
+                        <div
+                            cdkDropList
+                            id="dex"
+                            class="abilities-score"
+                            [cdkDropListData]="dex"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of dex" cdkDrag>{{item}}</div>
+                        </div>
+                        <div class="abilities-header">Constituion</div>                            
+                        <div
+                            cdkDropList
+                            id="con"
+                            class="abilities-score"
+                            [cdkDropListData]="con"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of con" cdkDrag>{{item}}</div>
+                        </div>
+                        <div class="abilities-header">Intelligence</div>                            
+                        <div
+                            cdkDropList
+                            id="int"
+                            class="abilities-score"
+                            [cdkDropListData]="int"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of int" cdkDrag>{{item}}</div>
+                        </div>
+                        <div class="abilities-header">Wisdom</div>                            
+                        <div
+                            cdkDropList
+                            id="wis"
+                            class="abilities-score"
+                            [cdkDropListData]="wis"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of wis" cdkDrag>{{item}}</div>
+                        </div>
+                        <div class="abilities-header">Charisma</div>                            
+                        <div
+                            cdkDropList
+                            id="cha"
+                            class="abilities-score"
+                            [cdkDropListData]="cha"
+                            (cdkDropListDropped)="addAbility($event)">
+                            <div class="ability-box" *ngFor="let item of cha" cdkDrag>{{item}}</div>
+                        </div>
+                    </div>
                 </div>
-                <div class="ability-scores-container">
-                    <div class="ability-container">
-                        <div class="ability-header">Strength</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="str"
-                                class="ability-list"
-                                [cdkDropListData]="str"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of str" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <div class="ability-header">Dexterity</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="dex"
-                                class="ability-list"
-                                [cdkDropListData]="dex"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of dex" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>    
-                    <div class="ability-container">
-                        <div class="ability-header">Constitution</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="con"
-                                class="ability-list"
-                                [cdkDropListData]="con"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of con" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                        <div class="ability-container">
-                        <div class="ability-header">Intelligence</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="int"
-                                class="ability-list"
-                                [cdkDropListData]="int"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of int" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <div class="ability-header">Wisdom</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="wis"
-                                class="ability-list"
-                                [cdkDropListData]="wis"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of wis" cdkDrag>{{item}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ability-container">
-                        <div class="ability-header">Charisma</div>
-                        <div class="ability-list-container">
-                            <div
-                                cdkDropList
-                                id="cha"
-                                class="ability-list"
-                                [cdkDropListData]="cha"
-                                (cdkDropListDropped)="addAbility($event)">
-                                <div class="ability-box" *ngFor="let item of cha" cdkDrag>{{item}}</div>
-                            </div> 
-                        </div>
-                    </div>  
-                </div>              
             </div>
             <div>
                 <button mat-button matStepperPrevious>Back</button>
@@ -372,17 +350,11 @@
     </mat-step>   
     <mat-step [stepControl]="equipmentFG" label="Equip your character">
         <form [formGroup]="equipmentFG">
-            <div *ngIf="character.class.starting_equipment.length > 0">
-                The {{ character.class.name }} starts with the following equipment:
-                <ul *ngFor="let item of character.class.starting_equipment">
-                    <li>{{ item.equipment.name }}</li>
-                </ul>
-            </div>
             <div *ngIf="character.class.starting_equipment_options.length > 0">
+                The {{ character.class.name }} chooses from the following options for starting equipment.
                 <div formArrayName="eqOptions">
-                    Choose from the following equipment options:
                     <div *ngFor="let option of character.class.starting_equipment_options; index as idx">
-                        <div>Choose {{ option.choose }} items from the following {{ option.type }}</div>
+                        <div>Choose {{ option.choose }}:</div>
                         <mat-button-toggle-group [formControlName]="idx" >
                             <mat-button-toggle *ngFor="let itemoption of option?.from" [value]="itemoption.equipment?.name">
                                 {{itemoption.equipment.name}}
@@ -390,7 +362,13 @@
                         </mat-button-toggle-group>
                     </div>
                 </div>
-            </div>    
+            </div> 
+            <div *ngIf="character.class.starting_equipment.length > 0">
+                They also start with: 
+                <div *ngFor="let item of character.class.starting_equipment">
+                    {{ item.equipment.name }}
+                </div>
+            </div>   
             <div>
                 <button mat-button matStepperPrevious>Back</button>
                 <button mat-button matStepperNext (click)="saveEquipment()">Next</button>
