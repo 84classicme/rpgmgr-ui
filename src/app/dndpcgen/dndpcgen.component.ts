@@ -331,4 +331,16 @@ export class DndpcgenComponent implements OnInit {
         });
       });
     }
+
+    getAbilityDetails(index: any): void{
+      console.log('Getting feature for ' + index + '...')
+      this.dndpcgenserviceService.getAbilityDescription(index)
+      .subscribe(feature => { 
+        this.feature = feature;
+        const dialogRef = this.dialog.open(FeatureModalComponent, {
+          width: '400px',
+          data: this.feature
+        });
+      });
+    }
 }
