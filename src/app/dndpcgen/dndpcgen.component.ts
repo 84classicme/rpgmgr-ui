@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import {FormBuilder, FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Class } from '../shared/dnd/class';
 import { Race } from './../shared/dnd/race';
 import { DndpcgenserviceService } from './dndpcgenservice.service';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Proficiency } from '../shared/dnd/proficiency';
 import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
@@ -13,7 +14,6 @@ import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
 import { Level, LevelSpellcasting } from '../shared/dnd/level';
 import { Feature } from '../shared/dnd/feature';
-import { MatDialog } from '@angular/material/dialog';
 import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
 
 const EMPTY_CLASS: Class = {
@@ -37,6 +37,7 @@ const EMPTY_OPTIONS_TRINITY: OptionsTrinity = {
   type: '',
   from: []
 }
+
 
 const EMPTY_VALUE_TRINITY: ValueTrinity = {
   index:  '',
@@ -77,7 +78,7 @@ con: '',
 int: '',
 wis: '',
 cha: '',
-background: '',
+background: {skills:[], proficiencies:[], feature:''},
 description: '',
 equipment: [],
 height: '',
@@ -86,9 +87,9 @@ alignment: '',
 deity: '',
 hair: '',
 eyes: '',
-skill1: '',
-skill2: '',
+skills: [],
 proficiencies: [],
+instruments: [],
 languages: []
 }
 
@@ -103,15 +104,22 @@ export class DndpcgenComponent implements OnInit {
   character: Character;
  
   races: Race[] = [];
-  selectedRace?: Race;
+  selectedRace: Race = EMPTY_RACE;
   classes: Class[] = [];
   selectedClass: Class = EMPTY_CLASS;
   feature?: Feature;
   levels: Level[] = [];
   skills: Proficiency[] = []; //TYPE: "Skills"
+
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
-  others: Proficiency[] = []; //TYPE: "Other"
+  instruments: Proficiency[] = []; //TYPE: "Musical Instruments"
+  other_tools: Proficiency[] = []; //TYPE: "Other Tools"
   languages: Language[] = [];
+
+  kits: Proficiency[] = []; //TYPE: "Kits"
+  gaming_sets: Proficiency[] = []; //TYPE: "Gaming Sets"
+  vehicles: Proficiency[] = []; //TYPE: "Vehicles"
+ 
   alignments: Alignment[] = [];
   abilities: string[] = ["15","14","13","12","10","8"];
   str: string[] = [];
@@ -126,14 +134,40 @@ export class DndpcgenComponent implements OnInit {
   classFG: FormGroup;
   abilitiesFG: FormGroup;
   descriptionFG: FormGroup;
-  equipmentFG = new FormGroup({
-    eqOptions: new FormArray([])
-  });
+  proficiencyFG: FormGroup;
+  equipmentFG: FormGroup;
+  // equipmentFG = new FormGroup({
+  //   eqOptions: new FormArray([])
+  // });
   confirmationFG: FormGroup;
+
+  get raceSkillOptions(): FormArray { 
+    return this.raceFG.get('raceSkillOptions') as FormArray; 
+  }
+
+  get classSkillOptions(): FormArray { 
+    return this.classFG.get('classSkillOptions') as FormArray; 
+  }
+
+  get classToolOptions(): FormArray { 
+    return this.classFG.get('classToolOptions') as FormArray; 
+  }
 
   get eqOptions(): FormArray { 
     return this.equipmentFG.get('eqOptions') as FormArray; 
- }
+  }
+
+  get skillOptions(): FormArray { 
+    return this.proficiencyFG.get('skillOptions') as FormArray; 
+  }
+
+  get toolOptions(): FormArray { 
+    return this.proficiencyFG.get('toolOptions') as FormArray; 
+  }
+
+  get instrumentOptions(): FormArray { 
+    return this.proficiencyFG.get('instrumentOptions') as FormArray; 
+  }
   
   constructor(
     private dndpcgenserviceService: DndpcgenserviceService, 
@@ -141,11 +175,15 @@ export class DndpcgenComponent implements OnInit {
     public dialog: MatDialog) { 
 
     this.character = initialState;
+   
     this.raceFG = this._formBuilder.group({
-      race: ['', Validators.required]
+      race: ['', Validators.required],
+      raceSkillOptions: new FormArray([]),
     });
     this.classFG = this._formBuilder.group({
-      class: ['', Validators.required]
+      class: ['', Validators.required],
+      classSkillOptions: new FormArray([]),
+      classToolOptions: new FormArray([]),
     });
     this.abilitiesFG = this._formBuilder.group({
       str: ['', Validators.required],
@@ -155,28 +193,44 @@ export class DndpcgenComponent implements OnInit {
       wis: ['', Validators.required],
       cha: ['', Validators.required],
     });
+    this.proficiencyFG  = this._formBuilder.group({
+      skillOptions: new FormArray([]),
+      toolOptions: new FormArray([]),
+      instrumentOptions: new FormArray([]),
+      skill1: [''],
+      skill2: [''],
+      artisantools: [''],
+      instruments: [''],
+      othertools: [''],
+      languages: ['']
+    });
     this.descriptionFG = this._formBuilder.group({
       height: [''],
       weight: [''],
       hair: [''],
       eyes: [''],
       deity: [''],
-      alignment: ['', Validators.required],
-      skill1: ['', Validators.required],
-      skill2: ['', Validators.required],
-      artisantools: [''],
-      othertools: [''],
-      languages: ['']
+      alignment: ['']
+    });
+    this.equipmentFG  = this._formBuilder.group({
+      eqOptions: new FormArray([])
     });
     this.confirmationFG = this._formBuilder.group({});
   }
 
     ngOnInit(): void {
       this.eqOptions.clear();
+      this.raceSkillOptions.clear();
+      this.classSkillOptions.clear();
+      this.classToolOptions.clear();
+      this.skillOptions.clear();
+      this.toolOptions.clear();
+      this.instrumentOptions.clear();
       this.getRaces();
       this.getClasses();
       this.getSkills();
       this.getArtisanTools();
+      this.getInstruments();
       this.getOtherTools(); 
       this.getLanguages();
       this.getAlignments();
@@ -188,9 +242,10 @@ export class DndpcgenComponent implements OnInit {
       }
     }
 
-    getLevels(myclass: any){
+    getClassDetails(myclass: any){
       console.log("Getting levels....");
       this.getLevelsForClass(myclass.value.name);
+      this.getSkillsForClass();
     }
 
     saveClass() {
@@ -240,6 +295,66 @@ export class DndpcgenComponent implements OnInit {
       this.abilitiesFG.get(id)?.setValue(data.length > 0 ? data[0] : '');
     }
 
+    counter(i: number) {
+      return new Array(i);
+    }
+
+    saveProficiencies(){
+      console.log("Saving proficiencies....");
+
+      this.character.skills = [];
+      if(this.skillOptions.length > 0){
+        for(let i = 0; i < this.skillOptions.length; i++) {
+          this.character.skills.push(this.skillOptions.at(i).value); 
+        }
+      }
+      if(this.proficiencyFG.value.skill1){
+        this.character.skills.push(this.proficiencyFG.value.skill1);
+      }
+      if(this.proficiencyFG.value.skill2){
+        this.character.skills.push(this.proficiencyFG.value.skill2);
+      }
+
+      this.character.proficiencies = [];
+      if(this.toolOptions.length > 0){
+        for(let i = 0; i < this.toolOptions.length; i++) {
+          this.character.proficiencies.push(this.toolOptions.at(i).value); 
+        }
+      }
+      if(this.proficiencyFG.value.artisantools){
+        this.proficiencyFG.value.artisantools.forEach((artisantool: string)  => {
+          this.character.proficiencies.push(artisantool); 
+        });
+      }
+      if(this.proficiencyFG.value.othertools){
+        this.proficiencyFG.value.othertools.forEach((othertool: string) => {
+          this.character.proficiencies.push(othertool); 
+        });
+      }
+
+      this.character.instruments = [];
+      if(this.instrumentOptions.length > 0){
+        for(let i = 0; i < this.instrumentOptions.length; i++) {
+          this.character.instruments.push(this.instrumentOptions.at(i).value); 
+        }
+      }
+      if(this.proficiencyFG.value.instruments){
+        this.proficiencyFG.value.instruments.forEach((instrument: string) => {
+          this.character.instruments.push(instrument); 
+        });
+      }
+
+      this.character.languages = [];
+      if(this.proficiencyFG.value.languages) {
+        this.selectedRace?.languages.forEach(language => {
+          this.character.languages.push(language.name); 
+        })
+        this.proficiencyFG.value.languages.forEach((language: string) => {
+          this.character.languages.push(language); 
+        });
+      }
+    }
+
     saveDescription(){
       console.log("Saving description....");
       this.character.height = this.descriptionFG.get("height")?.value;
@@ -248,24 +363,11 @@ export class DndpcgenComponent implements OnInit {
       this.character.eyes = this.descriptionFG.get("eyes")?.value;
       this.character.deity = this.descriptionFG.get("deity")?.value;
       this.character.alignment = this.descriptionFG.get("alignment")?.value;
-      this.character.skill1 = this.descriptionFG.get("skill1")?.value;
-      this.character.skill2 = this.descriptionFG.get("skill2")?.value;
-
-      this.character.proficiencies = [];
-      this.character.languages = [];
-      this.descriptionFG.value.artisantools.forEach((artisantool: string)  => {
-        this.character.proficiencies.push(artisantool); 
-      });
-      this.descriptionFG.value.othertools.forEach((othertool: string) => {
-        this.character.proficiencies.push(othertool); 
-      });
-      this.descriptionFG.value.languages.forEach((language: string) => {
-        this.character.languages.push(language); 
-      });
     }
 
     saveEquipment(){
       console.log("Saving eq....");
+      this.character.equipment = [];
       if(this.equipmentFG.touched){
         for(let i = 0; i < this.eqOptions.length; i++) {
           this.character.equipment.push(this.eqOptions.at(i).value); 
@@ -297,8 +399,20 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getOtherTools(): void {
-      this.dndpcgenserviceService.getProficienciesByType("Other")
-          .subscribe(others => this.others = others);
+      this.dndpcgenserviceService.getOtherToolProficiencies()
+          .subscribe(others => this.other_tools = others);
+    }
+
+    getInstruments(): void {
+      this.dndpcgenserviceService.getProficienciesByType("Musical Instruments")
+          .subscribe(instruments => this.instruments = instruments);
+    }
+
+    getVehicles(): void {
+      this.dndpcgenserviceService.getProficienciesByType("Vehicles")
+          .subscribe(vehicles => {
+            this.vehicles = vehicles;
+          });
     }
 
     getLanguages(): void {
@@ -320,6 +434,31 @@ export class DndpcgenComponent implements OnInit {
           });
     }
 
+    getSkillsForRace(){
+      this.raceSkillOptions.clear(); 
+      if(this.selectedRace.starting_proficiency_options){
+        for (let i = 0; i < this.selectedRace.starting_proficiency_options.choose; i++) {
+            this.raceSkillOptions.push(new FormControl());
+          } 
+      }
+    }
+
+    getSkillsForClass(){
+      this.classSkillOptions.clear();
+      this.selectedClass.proficiency_choices.filter(c => c.type === 'skill').forEach(choice => {
+        for (let i = 0; i < choice.choose; i++) {
+            this.classSkillOptions.push(new FormControl());
+          }           
+      })
+
+      this.classToolOptions.clear();
+      this.selectedClass.proficiency_choices.filter(c => c.type === 'tool' || c.type === 'instrument').forEach(choice => {
+        for (let i = 0; i < choice.choose; i++) {
+          this.classToolOptions.insert(i,new FormControl(choice.type + i.toString()));          
+        }          
+      })
+    }
+
     getFeatureDetails(index: any): void{
       console.log('Getting feature for ' + index + '...')
       this.dndpcgenserviceService.getFeatureDescription(index)
@@ -333,7 +472,7 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getAbilityDetails(index: any): void{
-      console.log('Getting feature for ' + index + '...')
+      console.log('Getting details on ability score ' + index + '...')
       this.dndpcgenserviceService.getAbilityDescription(index)
       .subscribe(feature => { 
         this.feature = feature;
@@ -342,5 +481,44 @@ export class DndpcgenComponent implements OnInit {
           data: this.feature
         });
       });
+    }
+
+    getSkillDetails(index: any): void{
+      console.log('Getting details on skill ' + index + '...')
+      if (index.substring(0,6) === "skill-") index =  index.substring(6)
+      this.dndpcgenserviceService.getSkillDescription(index)
+      .subscribe(feature => { 
+        this.feature = feature;
+        const dialogRef = this.dialog.open(FeatureModalComponent, {
+          width: '400px',
+          data: this.feature
+        });
+      });
+    }
+
+    getOptionDetails(index: any): void{
+      console.log('Getting details on option ' + index + '...')
+      if (index.substring(0,7) === "Skill: "){ 
+        index =  index.substring(7).toLowerCase();
+        this.dndpcgenserviceService.getSkillDescription(index).subscribe(feature => { 
+          this.feature = feature;
+          const dialogRef = this.dialog.open(FeatureModalComponent, {
+            width: '400px',
+            data: this.feature
+          });
+        });
+      } else {
+        this.dndpcgenserviceService.getEquipmentDescription(index).subscribe(feature => { 
+          this.feature = feature;
+          const dialogRef = this.dialog.open(FeatureModalComponent, {
+            width: '400px',
+            data: this.feature
+          });
+        });
+      }
+    }
+
+    log(){
+      console.log('logging');
     }
 }

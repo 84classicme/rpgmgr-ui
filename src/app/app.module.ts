@@ -19,7 +19,6 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import {MaterialExampleModule} from '../material.module';
 import { StoreModule } from '@ngrx/store';
-import { RaceStepComponent } from './dndpcgen/components/race-step/race-step.component';
 import { StripSkillPipe } from './dndpcgen/strip-skill.pipe';
 import { FeatureModalComponent } from './shared/feature-modal/feature-modal.component';
 @NgModule({
@@ -29,7 +28,6 @@ import { FeatureModalComponent } from './shared/feature-modal/feature-modal.comp
     PF2SpellsComponent,
     AdminComponent,
     DndpcgenComponent,
-    RaceStepComponent,
     StripSkillPipe,
     FeatureModalComponent,
   ],
@@ -62,7 +60,6 @@ import { FeatureModalComponent } from './shared/feature-modal/feature-modal.comp
     MatStepperModule,
     MatIconModule,
     MatSelectModule,
-    RaceStepComponent,
   ],
   providers: [],
   bootstrap: [ AppComponent ]

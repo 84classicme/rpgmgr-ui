@@ -36,11 +36,12 @@ export class DndpcgenserviceService {
   private backgroundurl = 'http://localhost:8080/dnd/backgrounds';
   private skillurl = 'http://localhost:8080/dnd/skills';
   private proficiencyurl = 'http://localhost:8080/dnd/proficiencies';
+  private proficiencyothertoolsurl = 'http://localhost:8080/dnd/proficiencies/othertools';
   private languageurl = 'http://localhost:8080/dnd/languages';
   private alignmenturl = 'http://localhost:8080/dnd/alignments';
   private featureurl = 'http://localhost:8080/dnd/features';
   private abilityurl = 'http://localhost:8080/dnd/ability-scores';
-
+  private equipmenturl = 'http://localhost:8080/dnd/equipment';
 
 
   constructor(private http: HttpClient) {}
@@ -65,6 +66,10 @@ export class DndpcgenserviceService {
     return this.http.get<Proficiency[]>(this.proficiencyurl)
   }
 
+  getOtherToolProficiencies(): Observable<Proficiency[]> {
+    return this.http.get<Proficiency[]>(this.proficiencyothertoolsurl)
+  }
+
   getProficienciesByType(type: string): Observable<Proficiency[]> {
     return this.http.get<Proficiency[]>(`${this.proficiencyurl}?type=${type}`);
   }
@@ -87,5 +92,13 @@ export class DndpcgenserviceService {
 
   getAbilityDescription(index: string): Observable<Feature> {
     return this.http.get<Feature>(`${this.abilityurl}/${index}`);
+  }
+
+  getSkillDescription(index: string): Observable<Feature> {
+    return this.http.get<Feature>(`${this.skillurl}/${index}`);
+  }
+
+  getEquipmentDescription(index: string): Observable<Feature> {
+    return this.http.get<Feature>(`${this.equipmenturl}/${index}`);
   }
 }

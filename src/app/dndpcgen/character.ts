@@ -13,7 +13,10 @@ export interface Character {
     int: string;
     wis: string;
     cha: string;
-    description: string;
+    skills: string[];
+    proficiencies: string[];
+    instruments: string[];
+    languages: string[];
     equipment: string[];
     height: string;
     weight: string;
@@ -21,9 +24,12 @@ export interface Character {
     eyes: string;
     alignment: string;
     deity: string;
-    background: string;
-    skill1: string;
-    skill2: string;
-    proficiencies: string[],
-    languages: string[]
+    description: string;
+    background: Background;
+}
+
+export interface Background {
+    skills: string[];
+    proficiencies: string[];
+    feature: string;
 }
