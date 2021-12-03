@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { empty, Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { Race } from '../shared/dnd/race'
-import { Character } from './character';
 import { Class } from '../shared/dnd/class';
 import { Background } from '../shared/dnd/background';
 import { Skill } from '../shared/dnd/skill';
@@ -11,20 +10,8 @@ import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
 import { Level } from '../shared/dnd/level';
 import { Feature } from '../shared/dnd/feature';
-
-// const EMPTY_CHARACTER: Character = {
-//   name: '',
-//   race: '',
-//   class: '',
-//   abilities: '',
-//   background: '',
-//   description: '',
-//   equipment: '',
-//   height: '',
-//   weight: '',
-//   alignment: '',
-//   deity: ''
-// }
+import { Subrace } from '../shared/dnd/subrace';
+import { Trait } from '../shared/dnd/trait';
 
 @Injectable({
   providedIn: 'root'
@@ -40,6 +27,7 @@ export class DndpcgenserviceService {
   private languageurl = 'http://localhost:8080/dnd/languages';
   private alignmenturl = 'http://localhost:8080/dnd/alignments';
   private featureurl = 'http://localhost:8080/dnd/features';
+  private traiturl = 'http://localhost:8080/dnd/traits';
   private abilityurl = 'http://localhost:8080/dnd/ability-scores';
   private equipmenturl = 'http://localhost:8080/dnd/equipment';
 
@@ -48,6 +36,10 @@ export class DndpcgenserviceService {
 
   getRaces(): Observable<Race[]> {
     return this.http.get<Race[]>(this.raceurl)
+  }
+
+  getSubracesForRace(race: string): Observable<Subrace[]> {
+    return this.http.get<Subrace[]>(`${this.raceurl}/${race}/subraces`);
   }
 
   getClasses(): Observable<Class[]> {
@@ -78,6 +70,10 @@ export class DndpcgenserviceService {
     return this.http.get<Language[]>(this.languageurl)
   }
 
+  getLanguageByIndex(index: string): Observable<Language> {
+    return this.http.get<Language>(`${this.languageurl}/${index}`)
+  }
+
   getAlignments(): Observable<Alignment[]> {
     return this.http.get<Alignment[]>(this.alignmenturl)
   }
@@ -88,6 +84,10 @@ export class DndpcgenserviceService {
 
   getFeatureDescription(index: string): Observable<Feature> {
     return this.http.get<Feature>(`${this.featureurl}/${index}`);
+  }
+
+  getTraitDescription(index: string): Observable<Trait> {
+    return this.http.get<Trait>(`${this.traiturl}/${index}`);
   }
 
   getAbilityDescription(index: string): Observable<Feature> {

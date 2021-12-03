@@ -6,26 +6,51 @@
                 <ng-template matStepLabel>Choose your race</ng-template>
                 <mat-form-field appearance="fill">
                     <mat-label>Race</mat-label>
-                    <mat-select formControlName="race" class="form-control" [(value)]="selectedRace" (selectionChange)="getSkillsForRace()" required>
+                    <mat-select formControlName="race" 
+                                class="form-control" 
+                                [(value)]="selectedRace" 
+                                (selectionChange)="getRaceDetails($event)" 
+                                required>
                         <mat-option *ngFor="let race of races" [value]="race">{{ race.name }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <div *ngIf="selectedRace.starting_proficiency_options?.choose">
-                    <!-- <div *ngFor="let option of selectedRace.starting_proficiency_options; index as idx">                         -->
-                            <div>Choose {{ selectedRace.starting_proficiency_options.choose }}:</div>
-                            <div *ngFor="let in of counter(selectedRace.starting_proficiency_options.choose); index as i"> 
-                                <div formArrayName="raceSkillOptions">                           
-                                    <mat-form-field appearance="fill">
-                                        <mat-label>{{ selectedRace.starting_proficiency_options.type | titlecase }}{{i+1}}</mat-label>
-                                        <mat-select [formControlName]="i"  class="form-control">
-                                            <mat-option *ngFor="let profoption of selectedRace.starting_proficiency_options.from" [value]="profoption.name | stripSkill">
-                                                {{ profoption.name | stripSkill }}
-                                            </mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
-                                </div>
-                            </div>                                             
-                    <!-- </div> -->
+                    <div *ngFor="let in of counter(selectedRace.starting_proficiency_options.choose); index as i"> 
+                        <div formArrayName="raceSkillOptions">                           
+                            <mat-form-field appearance="fill">
+                                <mat-label>Skill Choice</mat-label>
+                                <mat-select [formControlName]="i"  class="form-control">
+                                    <mat-option *ngFor="let profoption of selectedRace.starting_proficiency_options.from" [value]="profoption.name | stripSkill">
+                                        {{ profoption.name | stripSkill }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div> 
+                    </div>                                             
+                </div>
+                <div *ngIf="subraces.length">
+                    <div>Choose a subrace:</div>                     
+                    <mat-form-field appearance="fill">
+                        <mat-label>Subrace</mat-label>
+                        <mat-select formControlName="subrace" 
+                                    class="form-control"  
+                                    [(value)]="selectedSubrace"  
+                                    (selectionChange)="getSubraceDetails()">
+                            <mat-option *ngFor="let subrace of subraces" [value]="subrace">
+                                {{ subrace.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>                                         
+                </div>
+                <div *ngIf="selectedSubrace?.language_options?.choose">                
+                    <mat-form-field appearance="fill">
+                        <mat-label>Language Choice</mat-label>
+                        <mat-select formControlName="subraceLanguage"  class="form-control">
+                            <mat-option *ngFor="let language of selectedSubrace?.language_options?.from" [value]="language.name">
+                                {{ language.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>      
                 </div>
                 <div>
                     <button mat-button matStepperNext (click)="saveRace()">Next</button>
@@ -35,9 +60,69 @@
             <div class="step-detail-window">
                 <div *ngIf="selectedRace.name">
                     <table class='step-table'>
+                        <tr *ngIf="selectedRace.ability_bonuses.length">
+                            <th class='step-table-row-header'>Ability Bonus</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let ability_bonus of selectedRace?.ability_bonuses; last as isLast">
+                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{isLast?'':', '}}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedSubrace?.ability_bonuses?.length">
+                            <th class='step-table-row-header'>Subrace Bonus</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let ability_bonus of selectedSubrace?.ability_bonuses">
+                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}
+                                </span>
+                            </td>
+                        </tr>
                         <tr>
                             <th class='step-table-row-header'>Speed</th>
                             <td class='step-table-row'> {{ selectedRace.speed }}</td>
+                        </tr>
+                        <tr>
+                            <th class='step-table-row-header'>Size</th>
+                            <td class='step-table-row'> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
+                        </tr>
+                        <tr *ngIf="selectedRace.traits.length">
+                            <th class='step-table-row-header'>Traits</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let trait of selectedRace.traits; last as isLast" 
+                                        (click)="getTraitDetails(trait.index)">
+                                    <span class="clickable">{{ trait.name }}</span>{{isLast?'':', '}}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedSubrace?.racial_traits?.length">
+                            <th class='step-table-row-header'>Subrace Traits</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let trait of selectedSubrace.racial_traits; last as isLast" 
+                                        (click)="getTraitDetails(trait.index)">
+                                    <span class="clickable">{{ trait.name }}</span>{{isLast?'':', '}}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedRace.starting_proficiencies.length">
+                            <th class='step-table-row-header'>Starting Proficiencies</th>
+                            <td class='step-table-row'> 
+                                <span *ngFor="let proficiency of selectedRace.starting_proficiencies; last as isLast">
+                                    <span *ngIf="proficiency.index.startsWith('skill')">
+                                        <span class="clickable" (click)="getSkillDetails(proficiency.index.substring(6))">{{ proficiency.name | stripSkill }}</span>{{isLast?'':', '}}
+                                    </span>
+                                    <span *ngIf="!proficiency.index.startsWith('skill')">
+                                        {{ proficiency.name | stripSkill }}{{isLast?'':', '}}
+                                    </span>                                
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedRace.starting_proficiency_options">
+                            <th class='step-table-row-header'>Skill Choices</th>
+                            <td class='step-table-row'> 
+                                <h5>Choice of {{ selectedRace.starting_proficiency_options.choose }}:</h5>
+                                <span *ngFor="let option of selectedRace.starting_proficiency_options.from; last as isLast">
+                                    {{ option.name | stripSkill }}{{isLast?'':', '}}
+                                </span>
+                            </td>
                         </tr>
                         <tr>
                             <th class='step-table-row-header'>Alignment</th>
@@ -46,32 +131,26 @@
                         <tr>
                             <th class='step-table-row-header'>Age</th>
                             <td class='step-table-row'> {{ selectedRace.age }}</td>
-                        </tr>
-                        <tr>
-                            <th class='step-table-row-header'>Size</th>
-                            <td class='step-table-row'> {{ selectedRace.size }}. {{ selectedRace.size_description }}</td>
-                        </tr>
+                        </tr>               
                         <tr>
                             <th class='step-table-row-header'>Languages</th>
-
-                            <td class='step-table-row'> {{ selectedRace.language_desc }} </td>
-                        </tr>
-                        <tr *ngIf="selectedRace.starting_proficiencies.length > 0">
-                            <th class='step-table-row-header'>Starting Proficiencies</th>
                             <td class='step-table-row'> 
-                                <div *ngFor="let proficiency of selectedRace.starting_proficiencies">
-                                    {{ proficiency.name }}
-                                </div>
-                            </td>
-                        </tr>
-                        <tr *ngIf="selectedRace.traits.length > 0">
-                            <th class='step-table-row-header'>Traits</th>
-                            <td class='step-table-row'> 
-                                <span *ngFor="let trait of selectedRace.traits">
-                                    {{ trait.name }}
+                                <span *ngFor="let language of selectedRace.languages; last as isLast" 
+                                    (click)="getLanguageDetails(language.index)">
+                                    <span class="clickable">{{ language.name }}</span>{{isLast?'':', '}}
                                 </span>
                             </td>
                         </tr>
+                        <tr *ngIf="selectedSubrace?.language_options?.choose">
+                            <th class='step-table-row-header'>Subrace Languages</th>
+                            <td class='step-table-row'> 
+                                <h5>Choice of {{ selectedSubrace.language_options.choose }}:</h5>
+                                <span *ngFor="let language of selectedSubrace?.language_options?.from; last as isLast"
+                                    (click)="getLanguageDetails(language.index)">
+                                    <span class="clickable">{{ language.name }}</span>{{isLast?'':', '}}
+                                </span>
+                            </td>
+                        </tr>                        
                     </table>
                 </div>
             </div>
@@ -83,21 +162,25 @@
                 <form [formGroup]="classFG">
                 <mat-form-field appearance="fill">
                     <mat-label>Class</mat-label>
-                    <mat-select formControlName="class" class="form-control" [(value)]="selectedClass" (selectionChange)="getClassDetails($event)" required>
+                    <mat-select formControlName="class" 
+                                class="form-control" 
+                                [(value)]="selectedClass" 
+                                (selectionChange)="getClassDetails($event)" 
+                                required>
                         <mat-option *ngFor="let class of classes" [value]="class">{{ class.name }}</mat-option>
                     </mat-select>
                 </mat-form-field>
                 <div *ngIf="classSkillOptions.length">
                     <div *ngFor="let option of selectedClass.proficiency_choices; index as idx">
                         <div *ngIf="option.type === 'skill'">                           
-                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}s:</div>
+                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}{{ option.choose > 1 ? 's' : '' }}:</div>
                             <div *ngFor="let in of counter(option.choose); index as i"> 
                                 <div formArrayName="classSkillOptions">                           
                                     <mat-form-field appearance="fill">
-                                        <mat-label>{{ option.type | titlecase }}{{i+1}}</mat-label>
+                                        <mat-label>{{ option.type | titlecase }} {{i+1}}</mat-label>
                                         <mat-select [formControlName]="i"  class="form-control">
                                             <mat-option *ngFor="let profoption of option.from" [value]="profoption.name | stripSkill">
-                                                {{ profoption.name | stripSkill }}
+                                                {{ profoption.name | stripSkill }} 
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
@@ -109,11 +192,11 @@
                 <div *ngIf="classToolOptions.length">
                     <div *ngFor="let option of selectedClass.proficiency_choices; index as idx">
                         <div *ngIf="option.type === 'tool'">                           
-                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}s:</div>
+                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}{{ option.choose > 1 ? 's' : '' }}:</div>
                             <div *ngFor="let in of counter(option.choose); index as i"> 
                                 <div formArrayName="classToolOptions">                           
                                     <mat-form-field appearance="fill">
-                                        <mat-label>{{ option.type | titlecase }}{{i+1}}</mat-label>
+                                        <mat-label>{{ option.type | titlecase }} {{i+1}}</mat-label>
                                         <mat-select [formControlName]="i"  class="form-control">
                                             <mat-option *ngFor="let profoption of option.from" [value]="profoption.name | stripSkill">
                                                 {{ profoption.name | stripSkill }}
@@ -124,11 +207,11 @@
                             </div>                                             
                         </div>
                         <div *ngIf="option.type === 'instrument'">                           
-                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}s:</div>
+                            <div>Choose {{ option.choose }} {{ option.type | titlecase }}{{ option.choose > 1 ? 's' : '' }}:</div>
                             <div *ngFor="let in of counter(option.choose); index as i"> 
                                 <div formArrayName="classToolOptions">                           
                                     <mat-form-field appearance="fill">
-                                        <mat-label>{{ option.type | titlecase }}{{i+1}}</mat-label>
+                                        <mat-label>{{ option.type | titlecase }} {{i+1}}</mat-label>
                                         <mat-select [formControlName]="i"  class="form-control">
                                             <mat-option *ngFor="let profoption of option.from" [value]="profoption.name | stripSkill">
                                                 {{ profoption.name | stripSkill }}
@@ -156,110 +239,118 @@
                         <tr>
                             <th class='step-table-row-header'>Saving Throws</th>
                             <td class='step-table-row'> 
-                                <div *ngFor="let save of selectedClass.saving_throws">
-                                    {{ save.name }}
-                                </div>
+                                <span *ngFor="let save of selectedClass.saving_throws; last as isLast">
+                                    {{ save.name }}{{isLast?'':', '}}
+                                </span>
                             </td>
                         </tr>
                         <tr *ngIf="selectedClass.proficiencies.length > 0">
                             <th class='step-table-row-header'>Proficiencies</th>
                             <td class='step-table-row'> 
-                                <div *ngFor="let proficiency of selectedClass.proficiencies">
-                                    {{ proficiency.name }}
-                                </div>
+                                <span *ngFor="let proficiency of selectedClass.proficiencies; last as isLast">
+                                    {{ proficiency.name }}{{isLast?'':', '}}
+                                </span>
                             </td>
                         </tr>
                         <tr *ngIf="selectedClass.proficiency_choices.length > 0">
                             <th class='step-table-row-header'>Skills</th>
                             <td class='step-table-row'> 
-                                <div *ngFor="let choice of selectedClass.proficiency_choices">
+                                <span *ngFor="let choice of selectedClass.proficiency_choices">
                                     <h5>Choice of {{ choice.choose }}:</h5>
-                                    <div *ngFor="let option of choice.from" (click)="getSkillDetails(option.index)">
-                                        {{ option.name | stripSkill }}
+                                    <div *ngIf="choice.type === 'skill'">
+                                        <span *ngFor="let option of choice.from; last as isLast" (click)="getSkillDetails(option.index)">
+                                            <span class="clickable">{{ option.name | stripSkill }}</span>{{isLast?'':', '}}
+                                        </span>
                                     </div>
-                                </div>
+                                    <div *ngIf="choice.type === 'instrument' || choice.type === 'tool'">
+                                        <span *ngFor="let option of choice.from; last as isLast">
+                                            {{ option.name | stripSkill }}{{isLast?'':', '}}
+                                        </span>
+                                    </div>
+                                </span>
                             </td>
                         </tr>
                     </table>
-                </div>
-            </div>
-            <div class="step-detail-window" *ngIf="selectedClass.levels?.length">    
-                <table>
-                    <tr>
-                        <th class="level-table-header">Level</th>
-                        <th class="level-table-header">Bonus</th>
-                        <th class="level-table-header">Features</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.cantrips_known != null" class="level-table-header">Cantrips</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting &&
-                            selectedClass.levels[0].spellcasting.spells_known != null" class="level-table-header">Spells</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting &&
-                            selectedClass.levels[0].spellcasting.spell_slots_level_1 != null" class="level-table-header">1st</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_2 != null" class="level-table-header">2nd</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_3 != null" class="level-table-header">3rd</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_4 != null" class="level-table-header">4th</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_5 != null" class="level-table-header">5th</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_6 != null" class="level-table-header">6th</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_7 != null" class="level-table-header">7th</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_8 != null" class="level-table-header">8th</th>
-                        <th *ngIf="selectedClass.levels[0].spellcasting && 
-                            selectedClass.levels[0].spellcasting.spell_slots_level_9 != null" class="level-table-header">9th</th>
-                    </tr>
-                    <tr class="level-table-row" *ngFor="let level of selectedClass.levels; let even = even; let odd = odd" [ngClass]="{ odd: odd, even: even }">        
-                        <td>
-                            {{ level.level }}
-                        </td>
-                        <td>
-                            +{{ level.prof_bonus }}
-                        </td>
-                        <td> 
-                            <div *ngFor="let feature of level.features" (click)="getFeatureDetails(feature.index)">
-                                {{ feature.name  }}
-                            </div>
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.cantrips_known != null"> 
-                            {{ level.spellcasting?.cantrips_known }}
-                        </td>  
-                        <td *ngIf="level.spellcasting && level.spellcasting.spells_known != null">
-                            {{ level.spellcasting.spells_known }}
-                        </td>     
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_1 != null">
-                            {{ level.spellcasting.spell_slots_level_1 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_2 != null">
-                            {{ level.spellcasting.spell_slots_level_2 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_3 != null">
-                            {{ level.spellcasting.spell_slots_level_3 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_4 != null">
-                            {{ level.spellcasting.spell_slots_level_4 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_5 != null">
-                            {{ level.spellcasting.spell_slots_level_5 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_6 != null">
-                            {{ level.spellcasting.spell_slots_level_6 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_7 != null">
-                            {{ level.spellcasting.spell_slots_level_7 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_8 != null">
-                            {{ level.spellcasting.spell_slots_level_8 }}
-                        </td>
-                        <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_9 != null">
-                            {{ level.spellcasting.spell_slots_level_9 }}
-                        </td>                      
-                    </tr>
-                </table>
-            </div>           
+                </div>           
+                <div *ngIf="selectedClass.levels?.length">    
+                    <table>
+                        <tr>
+                            <th class="level-table-header">Level</th>
+                            <th class="level-table-header">Bonus</th>
+                            <th class="level-table-header">Features</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.cantrips_known != null" class="level-table-header">Cantrips</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting &&
+                                selectedClass.levels[0].spellcasting.spells_known != null" class="level-table-header">Spells</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting &&
+                                selectedClass.levels[0].spellcasting.spell_slots_level_1 != null" class="level-table-header">1st</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_2 != null" class="level-table-header">2nd</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_3 != null" class="level-table-header">3rd</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_4 != null" class="level-table-header">4th</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_5 != null" class="level-table-header">5th</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_6 != null" class="level-table-header">6th</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_7 != null" class="level-table-header">7th</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_8 != null" class="level-table-header">8th</th>
+                            <th *ngIf="selectedClass.levels[0].spellcasting && 
+                                selectedClass.levels[0].spellcasting.spell_slots_level_9 != null" class="level-table-header">9th</th>
+                        </tr>
+                        <tr class="level-table-row" *ngFor="let level of selectedClass.levels; let even = even; let odd = odd" [ngClass]="{ odd: odd, even: even }">        
+                            <td>
+                                {{ level.level }}
+                            </td>
+                            <td>
+                                +{{ level.prof_bonus }}
+                            </td>
+                            <td> 
+                                <span *ngFor="let feature of level.features; last as isLast" 
+                                    (click)="getFeatureDetails(feature.index)">
+                                    <span class="clickable">{{ feature.name }}</span>{{isLast?'':', '}}
+                                </span>
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.cantrips_known != null"> 
+                                {{ level.spellcasting?.cantrips_known }}
+                            </td>  
+                            <td *ngIf="level.spellcasting && level.spellcasting.spells_known != null">
+                                {{ level.spellcasting.spells_known }}
+                            </td>     
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_1 != null">
+                                {{ level.spellcasting.spell_slots_level_1 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_2 != null">
+                                {{ level.spellcasting.spell_slots_level_2 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_3 != null">
+                                {{ level.spellcasting.spell_slots_level_3 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_4 != null">
+                                {{ level.spellcasting.spell_slots_level_4 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_5 != null">
+                                {{ level.spellcasting.spell_slots_level_5 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_6 != null">
+                                {{ level.spellcasting.spell_slots_level_6 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_7 != null">
+                                {{ level.spellcasting.spell_slots_level_7 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_8 != null">
+                                {{ level.spellcasting.spell_slots_level_8 }}
+                            </td>
+                            <td *ngIf="level.spellcasting && level.spellcasting.spell_slots_level_9 != null">
+                                {{ level.spellcasting.spell_slots_level_9 }}
+                            </td>                      
+                        </tr>
+                    </table>
+                </div>   
+            </div>        
         </div>
     </mat-step>
     <mat-step [stepControl]="abilitiesFG" label="Choose your ability scores">

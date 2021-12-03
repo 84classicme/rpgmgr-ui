@@ -8,13 +8,14 @@ import { DndpcgenserviceService } from './dndpcgenservice.service';
 import { Proficiency } from '../shared/dnd/proficiency';
 import { Language } from '../shared/dnd/language';
 import { Alignment } from '../shared/dnd/alignment';
-import { Character } from './character';
+import { Level } from '../shared/dnd/level';
+import { Feature } from '../shared/dnd/feature';
+import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
+import { Subrace } from '../shared/dnd/subrace';
+import { Character } from './dndpcgen.interfaces';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
-import { Level, LevelSpellcasting } from '../shared/dnd/level';
-import { Feature } from '../shared/dnd/feature';
-import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -50,11 +51,22 @@ const EMPTY_ABILITY_BONUS : AbilityBonus = {
   "bonus":0
 }
 
+const EMPTY_SUBRACE: Subrace = {
+  index: '',
+  name: '',
+  ability_bonuses: [],
+  starting_proficiencies: [],
+  languages: [],
+  language_options: EMPTY_OPTIONS_TRINITY,
+  racial_traits: [],
+  url: '',
+}
+
 const EMPTY_RACE: Race = {
   index: '',
   name: '',
   speed: 0,
-  ability_bonuses: EMPTY_ABILITY_BONUS,
+  ability_bonuses: [],
   alignment: '',
   age: '',
   size: '',
@@ -68,9 +80,10 @@ const EMPTY_RACE: Race = {
   url: '',
 }
 
-const initialState: Character = {
+const EMPTY_CHARACTER: Character = {
 name: '',
 race: EMPTY_RACE,
+subrace: EMPTY_SUBRACE,
 class: EMPTY_CLASS,
 str: '',
 dex: '',
@@ -93,7 +106,6 @@ instruments: [],
 languages: []
 }
 
-
 @Component({
   selector: 'app-dndpcgen',
   templateUrl: './dndpcgen.component.html',
@@ -104,20 +116,22 @@ export class DndpcgenComponent implements OnInit {
   character: Character;
  
   races: Race[] = [];
-  selectedRace: Race = EMPTY_RACE;
+  selectedRace: Race;
+  subraces: Subrace[] = [];
+  selectedSubrace: Subrace;
+  subraceLanguage: string;
   classes: Class[] = [];
-  selectedClass: Class = EMPTY_CLASS;
+  selectedClass: Class;
   feature?: Feature;
   levels: Level[] = [];
+  
   skills: Proficiency[] = []; //TYPE: "Skills"
-
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
   instruments: Proficiency[] = []; //TYPE: "Musical Instruments"
   other_tools: Proficiency[] = []; //TYPE: "Other Tools"
   languages: Language[] = [];
-
   kits: Proficiency[] = []; //TYPE: "Kits"
-  gaming_sets: Proficiency[] = []; //TYPE: "Gaming Sets"
+  //gaming_sets: Proficiency[] = []; //TYPE: "Gaming Sets"
   vehicles: Proficiency[] = []; //TYPE: "Vehicles"
  
   alignments: Alignment[] = [];
@@ -136,9 +150,6 @@ export class DndpcgenComponent implements OnInit {
   descriptionFG: FormGroup;
   proficiencyFG: FormGroup;
   equipmentFG: FormGroup;
-  // equipmentFG = new FormGroup({
-  //   eqOptions: new FormArray([])
-  // });
   confirmationFG: FormGroup;
 
   get raceSkillOptions(): FormArray { 
@@ -174,10 +185,16 @@ export class DndpcgenComponent implements OnInit {
     private _formBuilder: FormBuilder,
     public dialog: MatDialog) { 
 
-    this.character = initialState;
+    this.character = EMPTY_CHARACTER;
+    this.selectedRace = EMPTY_RACE;
+    this.subraceLanguage = '';
+    this.selectedSubrace = EMPTY_SUBRACE;
+    this.selectedClass = EMPTY_CLASS;
    
     this.raceFG = this._formBuilder.group({
       race: ['', Validators.required],
+      subrace: [''],
+      subraceLanguage: [''],
       raceSkillOptions: new FormArray([]),
     });
     this.classFG = this._formBuilder.group({
@@ -236,14 +253,28 @@ export class DndpcgenComponent implements OnInit {
       this.getAlignments();
     }
 
+    getRaceDetails(myrace: any){
+      console.log("Getting Race Details....");
+      this.selectedSubrace = EMPTY_SUBRACE;
+      this.getSubracesForRace(myrace.value.index);
+      this.getSkillsForRace();
+    }
+
+    getSubraceDetails(){
+      console.log("Getting SubraceDetails....");
+    }
+
     saveRace(): void {
       if(this.selectedRace){
         this.character.race = this.selectedRace;
       }
+      if(this.selectedSubrace){
+        this.character.subrace = this.selectedSubrace;
+      }
     }
 
     getClassDetails(myclass: any){
-      console.log("Getting levels....");
+      console.log("Getting ClassDetails....");
       this.getLevelsForClass(myclass.value.name);
       this.getSkillsForClass();
     }
@@ -426,11 +457,20 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getLevelsForClass(cclass: string): void {
+      console.log("Getting levels....");
       this.dndpcgenserviceService.getLevelsByClass(cclass)
           .subscribe(levels => {
             this.levels = [];
             this.levels = levels;
             this.selectedClass.levels = levels;
+          });
+    }
+
+    getSubracesForRace(race: string){
+      this.dndpcgenserviceService.getSubracesForRace(race)
+          .subscribe(subraces => {
+            this.subraces = [];
+            this.subraces = subraces;
           });
     }
 
@@ -463,10 +503,31 @@ export class DndpcgenComponent implements OnInit {
       console.log('Getting feature for ' + index + '...')
       this.dndpcgenserviceService.getFeatureDescription(index)
       .subscribe(feature => { 
-        this.feature = feature;
         const dialogRef = this.dialog.open(FeatureModalComponent, {
           width: '400px',
-          data: this.feature
+          data: feature
+        });
+      });
+    }
+
+    getTraitDetails(index: any): void{
+      console.log('Getting feature for ' + index + '...')
+      this.dndpcgenserviceService.getTraitDescription(index)
+      .subscribe(trait => { 
+        const dialogRef = this.dialog.open(FeatureModalComponent, {
+          width: '400px',
+          data: trait
+        });
+      });
+    }
+
+    getLanguageDetails(index: any): void{
+      console.log('Getting feature for ' + index + '...')
+      this.dndpcgenserviceService.getLanguageByIndex(index)
+      .subscribe(language => { 
+        const dialogRef = this.dialog.open(FeatureModalComponent, {
+          width: '400px',
+          data:  {'name':language.name, 'index': language.index, 'desc':[language.desc]}
         });
       });
     }
@@ -474,11 +535,10 @@ export class DndpcgenComponent implements OnInit {
     getAbilityDetails(index: any): void{
       console.log('Getting details on ability score ' + index + '...')
       this.dndpcgenserviceService.getAbilityDescription(index)
-      .subscribe(feature => { 
-        this.feature = feature;
+      .subscribe(ability => { 
         const dialogRef = this.dialog.open(FeatureModalComponent, {
           width: '400px',
-          data: this.feature
+          data: ability
         });
       });
     }
@@ -487,36 +547,35 @@ export class DndpcgenComponent implements OnInit {
       console.log('Getting details on skill ' + index + '...')
       if (index.substring(0,6) === "skill-") index =  index.substring(6)
       this.dndpcgenserviceService.getSkillDescription(index)
-      .subscribe(feature => { 
-        this.feature = feature;
+      .subscribe(skill => { 
         const dialogRef = this.dialog.open(FeatureModalComponent, {
           width: '400px',
-          data: this.feature
+          data: skill
         });
       });
     }
 
-    getOptionDetails(index: any): void{
-      console.log('Getting details on option ' + index + '...')
-      if (index.substring(0,7) === "Skill: "){ 
-        index =  index.substring(7).toLowerCase();
-        this.dndpcgenserviceService.getSkillDescription(index).subscribe(feature => { 
-          this.feature = feature;
-          const dialogRef = this.dialog.open(FeatureModalComponent, {
-            width: '400px',
-            data: this.feature
-          });
-        });
-      } else {
-        this.dndpcgenserviceService.getEquipmentDescription(index).subscribe(feature => { 
-          this.feature = feature;
-          const dialogRef = this.dialog.open(FeatureModalComponent, {
-            width: '400px',
-            data: this.feature
-          });
-        });
-      }
-    }
+    // getOptionDetails(index: any): void{
+    //   console.log('Getting details on option ' + index + '...')
+    //   if (index.substring(0,7) === "Skill: "){ 
+    //     index =  index.substring(7).toLowerCase();
+    //     this.dndpcgenserviceService.getSkillDescription(index)
+    //     .subscribe(skill => { 
+    //       const dialogRef = this.dialog.open(FeatureModalComponent, {
+    //         width: '400px',
+    //         data: skill
+    //       });
+    //     });
+    //   } else {
+    //     this.dndpcgenserviceService.getEquipmentDescription(index)
+    //     .subscribe(equipment => { 
+    //       const dialogRef = this.dialog.open(FeatureModalComponent, {
+    //         width: '400px',
+    //         data: equipment
+    //       });
+    //     });
+    //   }
+    // }
 
     log(){
       console.log('logging');

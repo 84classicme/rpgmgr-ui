@@ -2,6 +2,10 @@
   color: cornflowerblue;
 }
 
+.clickable {
+  text-decoration: underline;
+}
+
 .step-container-window {
   display: flex;
   min-width: 400px
