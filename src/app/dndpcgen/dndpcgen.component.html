@@ -446,7 +446,6 @@
     </mat-step>     
     <mat-step [stepControl]="proficiencyFG" label="Choose your skills">
         <form [formGroup]="proficiencyFG">
-
             <h4>Background</h4>
             <h5>Skills</h5>
             <mat-form-field appearance="fill">
@@ -494,6 +493,10 @@
     </mat-step>  
     <mat-step [stepControl]="descriptionFG" label="Describe your character">
         <form [formGroup]="descriptionFG">
+            <mat-form-field appearance="fill">
+                <mat-label>Name</mat-label>
+                <input matInput placeholder="Name" formControlName="name">
+            </mat-form-field>
             <h4>Appearance</h4>
             <mat-form-field appearance="fill">
                 <mat-label>Height</mat-label>
@@ -565,75 +568,88 @@
         <form [formGroup]="confirmationFG">
             <table>
                 <tr>
-                    <td>Race</td>
-                    <td> {{ character.race.name }}</td>
+                    <td class='step-table-row-header'>Name</td>
+                    <td class='step-table-row'> {{ character.name }}</td>
                 </tr>
                 <tr>
-                    <td>Class</td>
-                    <td> {{ character.class.name }}</td>
+                    <td class='step-table-row-header'>Class</td>
+                    <td class='step-table-row'> {{ character.class.name }}</td>
                 </tr>
                 <tr>
-                    <td>Strength</td>
-                    <td> {{ character.str }}</td>
+                    <td class='step-table-row-header'>Alignment</td>
+                    <td class='step-table-row'> {{ character.alignment }}</td>
                 </tr>
                 <tr>
-                    <td>Dexterity</td>
-                    <td> {{ character.dex }}</td>
+                    <td class='step-table-row-header'>Deity</td>
+                    <td class='step-table-row'> {{ character.deity }}</td>
                 </tr>
                 <tr>
-                    <td>Constituion</td>
-                    <td> {{ character.con }}</td>
+                    <td class='step-table-row-header'>Race</td>
+                    <td class='step-table-row'> {{ character.race.name }}</td>
+                </tr>
+                <tr *ngIf="selectedRace.traits.length">
+                    <td class='step-table-row-header'>Traits</td>
+                    <td class='step-table-row'> 
+                        <span *ngFor="let trait of selectedRace.traits; last as isLast">
+                            {{ trait.name }}{{isLast?'':', '}}
+                        </span>
+                    </td>
+                </tr>
+                <tr *ngIf="selectedSubrace?.racial_traits?.length">
+                    <td class='step-table-row-header'>Subrace Traits</td>
+                    <td class='step-table-row'> 
+                        <span *ngFor="let trait of selectedSubrace.racial_traits; last as isLast">
+                            {{ trait.name }}{{isLast?'':', '}}
+                        </span>
+                    </td>
                 </tr>
                 <tr>
-                    <td>Intelligence</td>
-                    <td> {{ character.int }}</td>
+                    <td class='step-table-row-header'>Strength</td>
+                    <td class='step-table-row'> {{ character.str }}</td>
                 </tr>
                 <tr>
-                    <td>Wisdom</td>
-                    <td> {{ character.wis }}</td>
+                    <td class='step-table-row-header'>Dexterity</td>
+                    <td class='step-table-row'> {{ character.dex }}</td>
                 </tr>
                 <tr>
-                    <td>Charisma</td>
-                    <td> {{ character.cha}}</td>
+                    <td class='step-table-row-header'>Constituion</td>
+                    <td class='step-table-row'> {{ character.con }}</td>
                 </tr>
                 <tr>
-                    <td>Alignment</td>
-                    <td> {{ character.alignment }}</td>
+                    <td class='step-table-row-header'>Intelligence</td>
+                    <td class='step-table-row'> {{ character.int }}</td>
                 </tr>
                 <tr>
-                    <td>Deity</td>
-                    <td> {{ character.deity }}</td>
+                    <td class='step-table-row-header'>Wisdom</td>
+                    <td class='step-table-row'> {{ character.wis }}</td>
                 </tr>
                 <tr>
-                    <td>Skills</td>
-                    <td> 
-                        <div *ngFor="let skill of character.skills">
-                            {{ skill }}
-                        </div>
+                    <td class='step-table-row-header'>Charisma</td>
+                    <td class='step-table-row'> {{ character.cha }}</td>
+                </tr>
+                <tr>
+                    <td class='step-table-row-header'>Skills</td>
+                    <td class='step-table-row'>                      
+                        <span *ngFor="let skill of allSkills; last as isLast">
+                            {{ skill }}{{ isLast ? '' : ', ' }}
+                        </span>
                     </td>
                 </tr>
                 <tr *ngIf="character.proficiencies.length">
-                    <td>Proficiences</td>
-                    <td> 
+                    <td class='step-table-row-header'>Proficiences</td>
+                    <td class='step-table-row'> 
                         <div *ngFor="let proficiency of character.proficiencies">
                             {{ proficiency }}
-                        </div>
+                        </div>                    
                     </td>
                 </tr>
-                <tr *ngIf="character.proficiencies.length">
-                    <td>Instruments</td>
-                    <td> 
-                        <div *ngFor="let instrument of character.instruments">
-                            {{ instrument }}
-                        </div>
-                    </td>
-                </tr>
-                <tr *ngIf="character.languages.length">
-                    <td>Languages</td>
-                    <td> 
-                        <div *ngFor="let language of character.languages">
-                            {{ language }}
-                        </div>
+                <tr *ngIf="subraceLanguage || character.languages.length">
+                    <td class='step-table-row-header'>Languages</td>
+                    <td class='step-table-row'> 
+                        <div *ngIf="subraceLanguage">{{ subraceLanguage }}</div>
+                        <span *ngFor="let language of character.languages; last as isLast">
+                            {{ language }}{{ isLast ? '' : ', ' }}
+                        </span>
                     </td>
                 </tr>
             </table>

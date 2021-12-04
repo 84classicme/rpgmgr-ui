@@ -17,6 +17,7 @@ import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
 import { first } from 'rxjs';
+import { throwToolbarMixedModesError } from '@angular/material/toolbar';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -127,6 +128,8 @@ export class DndpcgenComponent implements OnInit {
   levels: Level[] = [];
   
   skills: Proficiency[] = []; //TYPE: "Skills"
+  raceSkills: string[] = []; //TYPE: "Skills"
+  classSkills: string[] = []; //TYPE: "Skills"
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
   instruments: Proficiency[] = []; //TYPE: "Musical Instruments"
   other_tools: Proficiency[] = []; //TYPE: "Other Tools"
@@ -180,6 +183,10 @@ export class DndpcgenComponent implements OnInit {
   get instrumentOptions(): FormArray { 
     return this.proficiencyFG.get('instrumentOptions') as FormArray; 
   }
+
+  get allSkills(): string[]{
+    return this.raceSkills.concat(this.classSkills).concat(this.character.skills);
+  }
   
   constructor(
     private dndpcgenserviceService: DndpcgenserviceService, 
@@ -223,6 +230,7 @@ export class DndpcgenComponent implements OnInit {
       languages: ['']
     });
     this.descriptionFG = this._formBuilder.group({
+      name: [''], 
       height: [''],
       weight: [''],
       hair: [''],
@@ -271,6 +279,15 @@ export class DndpcgenComponent implements OnInit {
       }
       if(this.selectedSubrace){
         this.character.subrace = this.selectedSubrace;
+        if(this.raceFG.value.subraceLanguage){
+          this.subraceLanguage = this.raceFG.value.subraceLanguage;
+        }
+      }
+      this.raceSkills = [];
+      if(this.selectedRace && this.raceFG.value.raceSkillOptions.length){
+        this.raceFG.value.raceSkillOptions.forEach((option: string) => {
+            this.raceSkills.push(option); 
+        });
       }
     }
 
@@ -289,6 +306,12 @@ export class DndpcgenComponent implements OnInit {
           this.eqOptions.push(new FormControl(index.toString())); 
           index++;
         })
+        this.classSkills = [];
+        if(this.classFG.value.classSkillOptions.length){
+          this.classFG.value.classSkillOptions.forEach((option: string) => {
+            this.classSkills.push(option); 
+          });
+        }
       } 
     }
 
@@ -497,14 +520,9 @@ export class DndpcgenComponent implements OnInit {
       }
 
       this.character.instruments = [];
-      if(this.instrumentOptions.length > 0){
-        for(let i = 0; i < this.instrumentOptions.length; i++) {
-          this.character.instruments.push(this.instrumentOptions.at(i).value); 
-        }
-      }
       if(this.proficiencyFG.value.instruments){
         this.proficiencyFG.value.instruments.forEach((instrument: string) => {
-          this.character.instruments.push(instrument); 
+          this.character.proficiencies.push(instrument); 
         });
       }
 
@@ -521,6 +539,7 @@ export class DndpcgenComponent implements OnInit {
 
     saveDescription(){
       console.log("Saving description....");
+      this.character.name = this.descriptionFG.get("name")?.value;
       this.character.height = this.descriptionFG.get("height")?.value;
       this.character.weight = this.descriptionFG.get("weight")?.value;
       this.character.hair = this.descriptionFG.get("hair")?.value;
