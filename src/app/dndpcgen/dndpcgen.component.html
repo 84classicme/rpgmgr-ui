@@ -64,7 +64,7 @@
                             <th class='step-table-row-header'>Ability Bonus</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let ability_bonus of selectedRace?.ability_bonuses; last as isLast">
-                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{isLast?'':', '}}
+                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>
@@ -110,7 +110,7 @@
                                         <span class="clickable" (click)="getSkillDetails(proficiency.index.substring(6))">{{ proficiency.name | stripSkill }}</span>{{isLast?'':', '}}
                                     </span>
                                     <span *ngIf="!proficiency.index.startsWith('skill')">
-                                        {{ proficiency.name | stripSkill }}{{isLast?'':', '}}
+                                        {{ proficiency.name | stripSkill }}{{ isLast ? '' : ', ' }}
                                     </span>                                
                                 </span>
                             </td>
@@ -120,7 +120,7 @@
                             <td class='step-table-row'> 
                                 <h5>Choice of {{ selectedRace.starting_proficiency_options.choose }}:</h5>
                                 <span *ngFor="let option of selectedRace.starting_proficiency_options.from; last as isLast">
-                                    {{ option.name | stripSkill }}{{isLast?'':', '}}
+                                    {{ option.name | stripSkill }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>
@@ -137,7 +137,7 @@
                             <td class='step-table-row'> 
                                 <span *ngFor="let language of selectedRace.languages; last as isLast" 
                                     (click)="getLanguageDetails(language.index)">
-                                    <span class="clickable">{{ language.name }}</span>{{isLast?'':', '}}
+                                    <span class="clickable">{{ language.name }}</span>{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>
@@ -147,7 +147,7 @@
                                 <h5>Choice of {{ selectedSubrace.language_options.choose }}:</h5>
                                 <span *ngFor="let language of selectedSubrace?.language_options?.from; last as isLast"
                                     (click)="getLanguageDetails(language.index)">
-                                    <span class="clickable">{{ language.name }}</span>{{isLast?'':', '}}
+                                    <span class="clickable">{{ language.name }}</span>{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>                        
@@ -240,31 +240,31 @@
                             <th class='step-table-row-header'>Saving Throws</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let save of selectedClass.saving_throws; last as isLast">
-                                    {{ save.name }}{{isLast?'':', '}}
+                                    {{ save.name }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>
-                        <tr *ngIf="selectedClass.proficiencies.length > 0">
+                        <tr *ngIf="selectedClass.proficiencies.length">
                             <th class='step-table-row-header'>Proficiencies</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let proficiency of selectedClass.proficiencies; last as isLast">
-                                    {{ proficiency.name }}{{isLast?'':', '}}
+                                    {{ proficiency.name }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>
-                        <tr *ngIf="selectedClass.proficiency_choices.length > 0">
+                        <tr *ngIf="selectedClass.proficiency_choices.length">
                             <th class='step-table-row-header'>Skills</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let choice of selectedClass.proficiency_choices">
                                     <h5>Choice of {{ choice.choose }}:</h5>
                                     <div *ngIf="choice.type === 'skill'">
                                         <span *ngFor="let option of choice.from; last as isLast" (click)="getSkillDetails(option.index)">
-                                            <span class="clickable">{{ option.name | stripSkill }}</span>{{isLast?'':', '}}
+                                            <span class="clickable">{{ option.name | stripSkill }}</span>{{ isLast ? '' : ', ' }}
                                         </span>
                                     </div>
                                     <div *ngIf="choice.type === 'instrument' || choice.type === 'tool'">
                                         <span *ngFor="let option of choice.from; last as isLast">
-                                            {{ option.name | stripSkill }}{{isLast?'':', '}}
+                                            {{ option.name | stripSkill }}{{ isLast ? '' : ', ' }}
                                         </span>
                                     </div>
                                 </span>
@@ -311,7 +311,7 @@
                             <td> 
                                 <span *ngFor="let feature of level.features; last as isLast" 
                                     (click)="getFeatureDetails(feature.index)">
-                                    <span class="clickable">{{ feature.name }}</span>{{isLast?'':', '}}
+                                    <span class="clickable">{{ feature.name }}</span>{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                             <td *ngIf="level.spellcasting && level.spellcasting.cantrips_known != null"> 
@@ -375,7 +375,8 @@
                         </div>
                     </div>
                     <div class="abilities-final">
-                        <div class="abilities-header" (click)="getAbilityDetails('str')">Strength</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('str')">Strength {{ abStr }}</div>                            
                         <div
                             cdkDropList
                             id="str"
@@ -384,7 +385,8 @@
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of str" cdkDrag>{{item}}</div>
                         </div>
-                        <div class="abilities-header" (click)="getAbilityDetails('dex')">Dexterity</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('dex')">Dexterity {{ abDex }}</div>                            
                         <div
                             cdkDropList
                             id="dex"
@@ -393,7 +395,8 @@
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of dex" cdkDrag>{{item}}</div>
                         </div>
-                        <div class="abilities-header" (click)="getAbilityDetails('con')">Constitution</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('con')">Constituion {{ abCon }}</div>                            
                         <div
                             cdkDropList
                             id="con"
@@ -402,7 +405,8 @@
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of con" cdkDrag>{{item}}</div>
                         </div>
-                        <div class="abilities-header" (click)="getAbilityDetails('int')">Intelligence</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('dex')">Intelligence {{ abInt }}</div>                            
                         <div
                             cdkDropList
                             id="int"
@@ -411,7 +415,8 @@
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of int" cdkDrag>{{item}}</div>
                         </div>
-                        <div class="abilities-header" (click)="getAbilityDetails('wis')">Wisdom</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('wis')">Wisdom {{ abWis }}</div>                            
                         <div
                             cdkDropList
                             id="wis"
@@ -420,7 +425,8 @@
                             (cdkDropListDropped)="addAbility($event)">
                             <div class="ability-box" *ngFor="let item of wis" cdkDrag>{{item}}</div>
                         </div>
-                        <div class="abilities-header" (click)="getAbilityDetails('cha')">Charisma</div>                            
+
+                        <div class="abilities-header" (click)="getAbilityDetails('cha')">Charisma  {{ abCha }}</div>                            
                         <div
                             cdkDropList
                             id="cha"
@@ -524,25 +530,31 @@
     </mat-step>     
     <mat-step [stepControl]="equipmentFG" label="Equip your character">
         <form [formGroup]="equipmentFG">
-            <div *ngIf="character.class.starting_equipment_options.length > 0">
-                The {{ character.class.name }} chooses from the following options for starting equipment.
+            <div *ngIf="character.class.starting_equipment.length">
+                Your {{ character.class.name }} starts with the following items: 
+                <span *ngFor="let item of character.class.starting_equipment; last as isLast">
+                    {{  isLast ? 'and ' : ''  }}{{ item.equipment.name }}{{  isLast ? '.' : ', '  }}
+                </span>
+            </div>
+            <div *ngIf="character.class.starting_equipment_options.length">
+                Choose from the following options to fully equip your {{ character.class.name }} for action, adventure, fame, glory, riches, etc, etc.
                 <div formArrayName="eqOptions">
                     <div *ngFor="let option of character.class.starting_equipment_options; index as idx">
-                        <div>Choose {{ option.choose }}:</div>
-                        <mat-button-toggle-group [formControlName]="idx" >
-                            <mat-button-toggle *ngFor="let itemoption of option?.from" [value]="itemoption.equipment?.name">
-                                {{itemoption.equipment.name}}
-                            </mat-button-toggle>
-                        </mat-button-toggle-group>
+                        <table>
+                            <tr>
+                                <td>Option {{ idx + 1 }}:</td>
+                                <td>
+                                    <mat-button-toggle-group [formControlName]="idx" >
+                                        <mat-button-toggle *ngFor="let itemoption of option?.from; last as isLast" [value]="itemoption.equipment?.name">
+                                            {{ itemoption.equipment.name }}
+                                        </mat-button-toggle>
+                                    </mat-button-toggle-group>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                 </div>
-            </div> 
-            <div *ngIf="character.class.starting_equipment.length > 0">
-                They also start with: 
-                <div *ngFor="let item of character.class.starting_equipment">
-                    {{ item.equipment.name }}
-                </div>
-            </div>   
+            </div>               
             <div>
                 <button mat-button matStepperPrevious>Back</button>
                 <button mat-button matStepperNext (click)="saveEquipment()">Next</button>
@@ -627,7 +639,7 @@
             </table>
             <div>
                 <button mat-button matStepperPrevious>Back</button>
-                <button mat-button matStepperNext (click)="log()">Confirm</button>
+                <button mat-button matStepperNext>Confirm</button>
             </div>
         </form>
     </mat-step>

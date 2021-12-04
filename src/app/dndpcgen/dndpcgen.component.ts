@@ -16,6 +16,7 @@ import { Character } from './dndpcgen.interfaces';
 import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
+import { first } from 'rxjs';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -300,30 +301,162 @@ export class DndpcgenComponent implements OnInit {
       this.character.cha = this.cha[0];
     }
 
+    getAbilityBonusString(ability: string): string{
+      const bonus = this.getAbilityBonus(ability); 
+      return  bonus > 0 ? "+" + bonus.toString() : "";
+    }
+
+    get abStr(): string{
+      return this.getAbilityBonusString("str");
+    }
+
+    get abDex(): string{
+      return this.getAbilityBonusString("dex");
+    }
+
+    get abCon(): string{
+      var bonus = this.getAbilityBonusString("con");
+      return bonus;
+    }
+
+    get abInt(): string{
+      var bonus = this.getAbilityBonusString("int");
+      return bonus;
+    }
+
+    get abWis(): string{
+      return this.getAbilityBonusString("wis");
+    }
+
+    get abCha(): string{
+      return this.getAbilityBonusString("cha");
+    }
+
+    getAbilityBonus(ability: string): number {
+      var race_ability_bonus;
+      var race_bonus = 0;
+      var subrace_ability_bonus;
+      var subrace_bonus = 0;
+      if (this.selectedRace.ability_bonuses.length) {
+        race_ability_bonus = this.selectedRace.ability_bonuses.find(a => a.ability_score.index === ability);
+        race_bonus = race_ability_bonus?.bonus ? race_ability_bonus.bonus : 0;
+      }
+      if (this.selectedSubrace.ability_bonuses.length) {
+        subrace_ability_bonus = this.selectedSubrace.ability_bonuses.find(a => a.ability_score.index === ability)
+        subrace_bonus = subrace_ability_bonus?.bonus ? subrace_ability_bonus.bonus : 0;
+      }
+      return race_bonus + subrace_bonus as number;
+    }
+
     addAbility(event: CdkDragDrop<string[]>) {
       if (event.previousContainer === event.container) {
-        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      } else if (event.container.id !== 'array' && event.previousContainer.id !== 'array' && 
-          event.container.data.length > 0){
-        transferArrayItem(event.previousContainer.data, event.container.data, 
-          event.previousIndex, event.currentIndex );
-        transferArrayItem(event.container.data, event.previousContainer.data, 
-          event.currentIndex, event.previousIndex );
-        this.updateAbilityScores(event);
-      } else {
-        transferArrayItem(event.previousContainer.data, event.container.data, 
-          event.previousIndex, event.currentIndex );
-        this.updateAbilityScores(event);
+          moveItemInArray(event.container.data, 
+                          event.previousIndex, 
+                          event.currentIndex);
+      } else if (event.container.id !== 'array' && event.container.data.length === 0) {
+          transferArrayItem(event.previousContainer.data, 
+                            event.container.data, 
+                            event.previousIndex, 
+                            event.currentIndex );
+          this.updateAbility(event.container.data, 
+                            event.currentIndex,
+                            event.container.id, 
+                            event.previousContainer.id);    
+      } else if (event.container.id !== 'array' && event.container.data.length === 1){
+          transferArrayItem(event.previousContainer.data, 
+                            event.container.data, 
+                            event.previousIndex, 
+                            event.currentIndex );
+          this.updateAbility(event.container.data, 
+                            event.currentIndex,
+                            event.container.id, 
+                            event.previousContainer.id);
+          transferArrayItem(event.container.data, 
+                            event.previousContainer.data, 
+                            event.currentIndex === 0 ? 1 : 0, 
+                            event.previousIndex );
+          this.updateAbility(event.previousContainer.data, 
+                            event.previousIndex,
+                            event.previousContainer.id, 
+                            event.container.id);
+      } else if (event.container.id === 'array') {
+          transferArrayItem(event.previousContainer.data, 
+                            event.container.data, 
+                            event.previousIndex, 
+                            event.currentIndex );
+          this.updateAbility(event.container.data, 
+                            event.currentIndex,
+                            event.container.id, 
+                            event.previousContainer.id);
+          
       }
     }
 
-    updateAbilityScores(event: CdkDragDrop<string[]>){
-      this.updateAbilityScore(event.container.id, event.container.data)
-      this.updateAbilityScore(event.previousContainer.id, event.previousContainer.data)
-    }
+    updateAbility(data: string[], index: number, id: string, prevId: string){
+      const previousBonus:number = this.getAbilityBonus(prevId);
+      const containerBonus:number = this.getAbilityBonus(id);
+      var abilityscore:number = Number(data[index]);
+      abilityscore -= previousBonus;
+      abilityscore += containerBonus;
 
-    updateAbilityScore(id: string, data: any){
-      this.abilitiesFG.get(id)?.setValue(data.length > 0 ? data[0] : '');
+      this.abilitiesFG.get(id)?.setValue(abilityscore ? abilityscore.toString() : "");
+
+      switch(id){
+        case "str": {
+          this.str[0] = abilityscore.toString();
+          break;
+        }
+        case "dex": {
+          this.dex[0] = abilityscore.toString();
+          break;
+        }
+        case "con": {
+          this.con[0] = abilityscore.toString();
+          break;
+        }
+        case "int": {
+          this.int[0] = abilityscore.toString();
+          break;
+        }
+        case "wis": {
+          this.wis[0] = abilityscore.toString();
+          break;
+        }
+        case "cha": {
+          this.cha[0] = abilityscore.toString();
+          break;
+        }
+        case "array": {
+          data[index] = abilityscore.toString();
+          switch(prevId){
+            case "str": {
+              this.str = [];
+              break;
+            }
+            case "dex": {
+              this.dex = [];
+              break;
+            }
+            case "con": {
+              this.con = [];
+              break;
+            }
+            case "int": {
+              this.int = [];
+              break;
+            }
+            case "wis": {
+              this.wis = [];
+              break;
+            }
+            case "cha": {
+              this.cha = [];
+              break;
+            }
+          }
+           break;
+        }
+      }
     }
 
     counter(i: number) {
@@ -553,31 +686,5 @@ export class DndpcgenComponent implements OnInit {
           data: skill
         });
       });
-    }
-
-    // getOptionDetails(index: any): void{
-    //   console.log('Getting details on option ' + index + '...')
-    //   if (index.substring(0,7) === "Skill: "){ 
-    //     index =  index.substring(7).toLowerCase();
-    //     this.dndpcgenserviceService.getSkillDescription(index)
-    //     .subscribe(skill => { 
-    //       const dialogRef = this.dialog.open(FeatureModalComponent, {
-    //         width: '400px',
-    //         data: skill
-    //       });
-    //     });
-    //   } else {
-    //     this.dndpcgenserviceService.getEquipmentDescription(index)
-    //     .subscribe(equipment => { 
-    //       const dialogRef = this.dialog.open(FeatureModalComponent, {
-    //         width: '400px',
-    //         data: equipment
-    //       });
-    //     });
-    //   }
-    // }
-
-    log(){
-      console.log('logging');
     }
 }
