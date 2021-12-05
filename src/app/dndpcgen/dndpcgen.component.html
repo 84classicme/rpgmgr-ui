@@ -75,9 +75,18 @@
                 <div *ngIf="selectedRace.name">
                     <table class='step-table'>
                         <tr *ngIf="selectedRace.ability_bonuses.length">
-                            <th class='step-table-row-header'>Ability Bonus</th>
+                            <th class='step-table-row-header'>Ability Bonus{{ selectedRace.ability_bonuses.length > 1 ? 'es' : '' }}</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let ability_bonus of selectedRace?.ability_bonuses; last as isLast">
+                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{ isLast ? '' : ', ' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedRace.ability_bonus_options">
+                            <th class='step-table-row-header'>Ability Bonus Options</th>
+                            <td class='step-table-row'> 
+                                Choose {{ selectedRace.ability_bonus_options.choose}} from: 
+                                <span *ngFor="let ability_bonus of selectedRace?.ability_bonus_options?.from; last as isLast">
                                     +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
@@ -643,8 +652,8 @@
                 </tr>
                 <tr>
                     <td class='step-table-row-header'>Skills</td>
-                    <td class='step-table-row'>                      
-                        <span *ngFor="let skill of allSkills; last as isLast">
+                    <td class='step-table-row'>            
+                        <span *ngFor="let skill of character.skills; last as isLast">
                             {{ skill }}{{ isLast ? '' : ', ' }}
                         </span>
                     </td>
@@ -652,8 +661,8 @@
                 <tr *ngIf="character.proficiencies.length">
                     <td class='step-table-row-header'>Proficiences</td>
                     <td class='step-table-row'> 
-                        <div *ngFor="let proficiency of character.proficiencies">
-                            {{ proficiency }}
+                        <div *ngFor="let proficiency of character.proficiencies; last as isLast">
+                            {{ proficiency }}{{ isLast ? '' : ', ' }}
                         </div>                    
                     </td>
                 </tr>

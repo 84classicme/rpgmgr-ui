@@ -187,10 +187,6 @@ export class DndpcgenComponent implements OnInit {
   get instrumentOptions(): FormArray { 
     return this.proficiencyFG.get('instrumentOptions') as FormArray; 
   }
-
-  get allSkills(): string[]{
-    return this.raceSkills.concat(this.classSkills).concat(this.character.skills);
-  }
   
   constructor(
     private dndpcgenserviceService: DndpcgenserviceService, 
@@ -521,6 +517,13 @@ export class DndpcgenComponent implements OnInit {
       }
       if(this.proficiencyFG.value.skill2){
         this.character.skills.push(this.proficiencyFG.value.skill2);
+      }
+      if (this.raceSkills.length > 0){
+        this.raceSkills.forEach(s => this.character.skills.push(s));
+
+      }
+      if (this.classSkills.length > 0){
+        this.classSkills.forEach(s => this.character.skills.push(s));
       }
 
       this.character.proficiencies = [];
