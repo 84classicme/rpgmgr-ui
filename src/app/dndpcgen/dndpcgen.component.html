@@ -39,7 +39,7 @@
                             <mat-form-field appearance="fill">
                                 <mat-label>Skill Choice</mat-label>
                                 <mat-select [formControlName]="i"  class="form-control">
-                                    <mat-option *ngFor="let profoption of selectedRace.starting_proficiency_options.from" [value]="profoption.name | stripSkill">
+                                    <mat-option *ngFor="let profoption of selectedRace.starting_proficiency_options.from" [value]="profoption.name | stripSkill" >
                                         {{ profoption.name | stripSkill }}
                                     </mat-option>
                                 </mat-select>
@@ -61,6 +61,7 @@
                         </mat-select>
                     </mat-form-field>                                         
                 </div>
+
                 <div *ngIf="selectedSubrace?.language_options?.choose">                
                     <mat-form-field appearance="fill">
                         <mat-label>Language Choice</mat-label>
@@ -79,11 +80,11 @@
             <div class="step-detail-window">
                 <div *ngIf="selectedRace.name">
                     <table class='step-table'>
-                        <tr *ngIf="selectedRace.ability_bonuses.length">
+                        <tr *ngIf="selectedRace?.ability_bonuses?.length">
                             <th class='step-table-row-header'>Ability Bonus{{ selectedRace.ability_bonuses.length > 1 ? 'es' : '' }}</th>
                             <td class='step-table-row'> 
                                 <span *ngFor="let ability_bonus of selectedRace?.ability_bonuses; last as isLast">
-                                    +{{ ability_bonus.bonus }} {{ ability_bonus.ability_score.name }}{{ isLast ? '' : ', ' }}
+                                    +{{ ability_bonus?.bonus }} {{ ability_bonus?.ability_score?.name }}{{ isLast ? '' : ', ' }}
                                 </span>
                             </td>
                         </tr>

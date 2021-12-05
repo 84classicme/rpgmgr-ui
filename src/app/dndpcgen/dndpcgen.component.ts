@@ -132,7 +132,6 @@ export class DndpcgenComponent implements OnInit {
   other_tools: Proficiency[] = []; //TYPE: "Other Tools"
   languages: Language[] = [];
   kits: Proficiency[] = []; //TYPE: "Kits"
-  //gaming_sets: Proficiency[] = []; //TYPE: "Gaming Sets"
   vehicles: Proficiency[] = []; //TYPE: "Vehicles"
  
   alignments: Alignment[] = [];
@@ -289,7 +288,7 @@ export class DndpcgenComponent implements OnInit {
             this.raceSkills.push(option); 
         });
       }
-      if(this.selectedRace && this.raceFG.value.raceAbilityOptions.length){
+      if(this.selectedRace && this.raceFG.value.raceAbilityOptions.length > 0){
         this.raceFG.value.raceAbilityOptions.forEach((option: any) => {
             this.selectedRace.ability_bonuses.push(option);  
         });
@@ -409,17 +408,15 @@ export class DndpcgenComponent implements OnInit {
                             event.previousContainer.id, 
                             event.container.id);
       } else if (event.container.id === 'array') {
-        //if(event.previousContainer.data.length === 1){
           this.clearAbility(event.previousContainer.id);
-        //}
-        transferArrayItem(event.previousContainer.data, 
-                          event.container.data, 
-                          event.previousIndex, 
-                          event.currentIndex );
-        this.updateAbility(event.container.data, 
-                          event.currentIndex,
-                          event.container.id, 
-                          event.previousContainer.id);          
+          transferArrayItem(event.previousContainer.data, 
+                            event.container.data, 
+                            event.previousIndex, 
+                            event.currentIndex );
+          this.updateAbility(event.container.data, 
+                            event.currentIndex,
+                            event.container.id, 
+                            event.previousContainer.id);          
       }
     }
 
