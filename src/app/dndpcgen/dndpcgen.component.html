@@ -1,5 +1,10 @@
 <mat-stepper orientation="vertical" [linear]="isLinear" #stepper>
-    <mat-step [stepControl]="raceFG">
+
+    <ng-template matStepperIcon="phone">
+        <mat-icon>call_end</mat-icon>
+      </ng-template>
+
+    <mat-step [stepControl]="raceFG"  state="phone">
         <div class="step-container-window">
             <div class="step-main-window">
                 <form [formGroup]="raceFG">

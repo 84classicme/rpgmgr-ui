@@ -1,6 +1,6 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {FormBuilder, FormArray, FormControl, FormGroup, Validators} from '@angular/forms';
+import { FormBuilder, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Class } from '../shared/dnd/class';
 import { Race } from './../shared/dnd/race';
@@ -15,8 +15,6 @@ import { Subrace } from '../shared/dnd/subrace';
 import { Character } from './dndpcgen.interfaces';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
-
-
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -39,7 +37,6 @@ const EMPTY_OPTIONS_TRINITY: any = {
   type: '',
   from: []
 }
-
 
 const EMPTY_VALUE_TRINITY: ValueTrinity = {
   index:  '',

@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
 import { Spell } from './spell'
 import { SpellService } from './spell.service';
 import {FilterService} from 'primeng/api';
