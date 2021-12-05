@@ -14,6 +14,20 @@
                         <mat-option *ngFor="let race of races" [value]="race">{{ race.name }}</mat-option>
                     </mat-select>
                 </mat-form-field>
+                <div *ngIf="selectedRace.ability_bonus_options?.choose">
+                    <div *ngFor="let in of counter(selectedRace.ability_bonus_options.choose); index as i"> 
+                        <div formArrayName="raceAbilityOptions">                           
+                            <mat-form-field appearance="fill">
+                                <mat-label>Ability Bonus {{ i + 1 }}</mat-label>
+                                <mat-select [formControlName]="i"  class="form-control">
+                                    <mat-option *ngFor="let abbonus of selectedRace.ability_bonus_options.from" [value]="abbonus">
+                                        +{{ abbonus.bonus }} {{ abbonus.ability_score.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div> 
+                    </div>                                            
+                </div>
                 <div *ngIf="selectedRace.starting_proficiency_options?.choose">
                     <div *ngFor="let in of counter(selectedRace.starting_proficiency_options.choose); index as i"> 
                         <div formArrayName="raceSkillOptions">                           

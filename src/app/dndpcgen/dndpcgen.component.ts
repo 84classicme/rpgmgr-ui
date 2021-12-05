@@ -13,11 +13,10 @@ import { Feature } from '../shared/dnd/feature';
 import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
 import { Subrace } from '../shared/dnd/subrace';
 import { Character } from './dndpcgen.interfaces';
-import { OptionsTrinity } from '../shared/dnd/optiontrinity';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
-import { first } from 'rxjs';
-import { throwToolbarMixedModesError } from '@angular/material/toolbar';
+
+
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -35,7 +34,7 @@ const EMPTY_CLASS: Class = {
   url: ''
 }
 
-const EMPTY_OPTIONS_TRINITY: OptionsTrinity = {
+const EMPTY_OPTIONS_TRINITY: any = {
   choose:  0,
   type: '',
   from: []
@@ -69,6 +68,7 @@ const EMPTY_RACE: Race = {
   name: '',
   speed: 0,
   ability_bonuses: [],
+  ability_bonus_options: EMPTY_OPTIONS_TRINITY,
   alignment: '',
   age: '',
   size: '',
@@ -156,6 +156,10 @@ export class DndpcgenComponent implements OnInit {
   equipmentFG: FormGroup;
   confirmationFG: FormGroup;
 
+  get raceAbilityOptions(): FormArray { 
+    return this.raceFG.get('raceAbilityOptions') as FormArray; 
+  }
+
   get raceSkillOptions(): FormArray { 
     return this.raceFG.get('raceSkillOptions') as FormArray; 
   }
@@ -204,6 +208,7 @@ export class DndpcgenComponent implements OnInit {
       subrace: [''],
       subraceLanguage: [''],
       raceSkillOptions: new FormArray([]),
+      raceAbilityOptions: new FormArray([]),
     });
     this.classFG = this._formBuilder.group({
       class: ['', Validators.required],
@@ -247,6 +252,7 @@ export class DndpcgenComponent implements OnInit {
     ngOnInit(): void {
       this.eqOptions.clear();
       this.raceSkillOptions.clear();
+      this.raceAbilityOptions.clear();
       this.classSkillOptions.clear();
       this.classToolOptions.clear();
       this.skillOptions.clear();
@@ -267,6 +273,7 @@ export class DndpcgenComponent implements OnInit {
       this.selectedSubrace = EMPTY_SUBRACE;
       this.getSubracesForRace(myrace.value.index);
       this.getSkillsForRace();
+      this.getAbilityOptionsForRace();
     }
 
     getSubraceDetails(){
@@ -287,6 +294,11 @@ export class DndpcgenComponent implements OnInit {
       if(this.selectedRace && this.raceFG.value.raceSkillOptions.length){
         this.raceFG.value.raceSkillOptions.forEach((option: string) => {
             this.raceSkills.push(option); 
+        });
+      }
+      if(this.selectedRace && this.raceFG.value.raceAbilityOptions.length){
+        this.raceFG.value.raceAbilityOptions.forEach((option: any) => {
+            this.selectedRace.ability_bonuses.push(option);  
         });
       }
     }
@@ -361,17 +373,18 @@ export class DndpcgenComponent implements OnInit {
       var subrace_ability_bonus;
       var subrace_bonus = 0;
       if (this.selectedRace.ability_bonuses.length) {
-        race_ability_bonus = this.selectedRace.ability_bonuses.find(a => a.ability_score.index === ability);
+        race_ability_bonus = this.selectedRace.ability_bonuses.find(a => a?.ability_score.index === ability);
         race_bonus = race_ability_bonus?.bonus ? race_ability_bonus.bonus : 0;
       }
       if (this.selectedSubrace.ability_bonuses.length) {
-        subrace_ability_bonus = this.selectedSubrace.ability_bonuses.find(a => a.ability_score.index === ability)
+        subrace_ability_bonus = this.selectedSubrace.ability_bonuses.find(a => a?.ability_score.index === ability)
         subrace_bonus = subrace_ability_bonus?.bonus ? subrace_ability_bonus.bonus : 0;
       }
       return race_bonus + subrace_bonus as number;
     }
 
     addAbility(event: CdkDragDrop<string[]>) {
+      console.log("addAbility. container.id=" + event.container.id + " currentIndex=" + event.currentIndex + " previousContainer.id=" + event.previousContainer.id + " previousIndex=" + event.previousIndex);
       if (event.previousContainer === event.container) {
           moveItemInArray(event.container.data, 
                           event.previousIndex, 
@@ -397,28 +410,32 @@ export class DndpcgenComponent implements OnInit {
           transferArrayItem(event.container.data, 
                             event.previousContainer.data, 
                             event.currentIndex === 0 ? 1 : 0, 
-                            event.previousIndex );
+                            event.previousIndex);
           this.updateAbility(event.previousContainer.data, 
                             event.previousIndex,
                             event.previousContainer.id, 
                             event.container.id);
       } else if (event.container.id === 'array') {
-          transferArrayItem(event.previousContainer.data, 
-                            event.container.data, 
-                            event.previousIndex, 
-                            event.currentIndex );
-          this.updateAbility(event.container.data, 
-                            event.currentIndex,
-                            event.container.id, 
-                            event.previousContainer.id);
-          
+        //if(event.previousContainer.data.length === 1){
+          this.clearAbility(event.previousContainer.id);
+        //}
+        transferArrayItem(event.previousContainer.data, 
+                          event.container.data, 
+                          event.previousIndex, 
+                          event.currentIndex );
+        this.updateAbility(event.container.data, 
+                          event.currentIndex,
+                          event.container.id, 
+                          event.previousContainer.id);          
       }
     }
 
     updateAbility(data: string[], index: number, id: string, prevId: string){
+      console.log("updateAbility. data=" + data + " index=" + index + " id=" + id + " prevId=" + prevId);
       const previousBonus:number = this.getAbilityBonus(prevId);
       const containerBonus:number = this.getAbilityBonus(id);
       var abilityscore:number = Number(data[index]);
+      console.log("updateAbility. abilityscore=" + abilityscore + " containerBonus=" + containerBonus + " previousBonus=" + previousBonus);
       abilityscore -= previousBonus;
       abilityscore += containerBonus;
 
@@ -426,60 +443,64 @@ export class DndpcgenComponent implements OnInit {
 
       switch(id){
         case "str": {
-          this.str[0] = abilityscore.toString();
+          this.str[index] = abilityscore.toString();
           break;
         }
         case "dex": {
-          this.dex[0] = abilityscore.toString();
+          this.dex[index] = abilityscore.toString();
           break;
         }
         case "con": {
-          this.con[0] = abilityscore.toString();
+          this.con[index] = abilityscore.toString();
           break;
         }
         case "int": {
-          this.int[0] = abilityscore.toString();
+          this.int[index] = abilityscore.toString();
           break;
         }
         case "wis": {
-          this.wis[0] = abilityscore.toString();
+          this.wis[index] = abilityscore.toString();
           break;
         }
         case "cha": {
-          this.cha[0] = abilityscore.toString();
+          this.cha[index] = abilityscore.toString();
           break;
         }
         case "array": {
           data[index] = abilityscore.toString();
-          switch(prevId){
-            case "str": {
-              this.str = [];
-              break;
-            }
-            case "dex": {
-              this.dex = [];
-              break;
-            }
-            case "con": {
-              this.con = [];
-              break;
-            }
-            case "int": {
-              this.int = [];
-              break;
-            }
-            case "wis": {
-              this.wis = [];
-              break;
-            }
-            case "cha": {
-              this.cha = [];
-              break;
-            }
-          }
-           break;
+          data.sort( (a,b) => parseInt(b) - parseInt(a))
+          break;
         }
       }
+    }
+
+    clearAbility(ability: string){
+      switch(ability){
+        case "str": {
+          this.str = [];
+          break;
+        }
+        case "dex": {
+          this.dex = [];
+          break;
+        }
+        case "con": {
+          this.con = [];
+          break;
+        }
+        case "int": {
+          this.int = [];
+          break;
+        }
+        case "wis": {
+          this.wis = [];
+          break;
+        }
+        case "cha": {
+          this.cha = [];
+          break;
+        }
+}
     }
 
     counter(i: number) {
@@ -631,6 +652,15 @@ export class DndpcgenComponent implements OnInit {
       if(this.selectedRace.starting_proficiency_options){
         for (let i = 0; i < this.selectedRace.starting_proficiency_options.choose; i++) {
             this.raceSkillOptions.push(new FormControl());
+          } 
+      }
+    }
+
+    getAbilityOptionsForRace(){
+      this.raceAbilityOptions.clear(); 
+      if(this.selectedRace.ability_bonus_options){
+        for (let i = 0; i < this.selectedRace.ability_bonus_options.choose; i++) {
+            this.raceAbilityOptions.push(new FormControl());
           } 
       }
     }
