@@ -13,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { MaterialExampleModule } from '../../material.module';
 import { StripSkillPipe } from './strip-skill.pipe';
 import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.component';
+import { StepRaceSelectionComponent } from './step-race-selection/step-race-selection.component';
 
 
 @NgModule({
@@ -20,6 +21,7 @@ import { FeatureModalComponent } from '../shared/feature-modal/feature-modal.com
     DndpcgenComponent,
     StripSkillPipe,
     FeatureModalComponent,
+    StepRaceSelectionComponent
   ],
   imports: [
     CommonModule,

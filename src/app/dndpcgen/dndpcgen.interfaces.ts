@@ -9,7 +9,9 @@ import { ValueTrinity } from "../shared/dnd/valuetrinity"
 export interface Character {
     name: string;
     race: Race;
+    raceSkills: string[];
     subrace: Subrace;
+    subraceAbilityOptions: AbilityBonus[];
     class: Class;
     str: string;
     dex: string;
@@ -21,6 +23,7 @@ export interface Character {
     proficiencies: string[];
     instruments: string[];
     languages: string[];
+    subraceLanguage: string;
     equipment: string[];
     height: string;
     weight: string;

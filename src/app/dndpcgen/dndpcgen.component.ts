@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { FormBuilder, FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
@@ -15,6 +15,10 @@ import { Subrace } from '../shared/dnd/subrace';
 import { Character } from './dndpcgen.interfaces';
 import { ValueTrinity } from '../shared/dnd/valuetrinity';
 import { AbilityBonus } from '../shared/dnd/abilitybonus';
+import { StepRaceSelectionComponent } from './step-race-selection/step-race-selection.component';
+import { validateClassSkillDuplicates, validateProficiencies } from './validators/validators';
+import { MatSelectChange } from '@angular/material/select';
+import { EMPTY, Observable } from 'rxjs';
 
 const EMPTY_CLASS: Class = {
   index: '',
@@ -82,7 +86,9 @@ const EMPTY_RACE: Race = {
 const EMPTY_CHARACTER: Character = {
 name: '',
 race: EMPTY_RACE,
+raceSkills: [],
 subrace: EMPTY_SUBRACE,
+subraceAbilityOptions: [],
 class: EMPTY_CLASS,
 str: '',
 dex: '',
@@ -102,7 +108,8 @@ eyes: '',
 skills: [],
 proficiencies: [],
 instruments: [],
-languages: []
+languages: [],
+subraceLanguage: ''
 }
 
 @Component({
@@ -110,22 +117,21 @@ languages: []
   templateUrl: './dndpcgen.component.html',
   styleUrls: ['./dndpcgen.component.css']
 })
-export class DndpcgenComponent implements OnInit {
+export class DndpcgenComponent {
 
   character: Character;
  
   races: Race[] = [];
   selectedRace: Race;
-  subraces: Subrace[] = [];
+  subraces$:Observable<Subrace[]>;
+  //subraces: Subrace[] = [];
   selectedSubrace: Subrace;
-  subraceLanguage: string;
   classes: Class[] = [];
   selectedClass: Class;
   feature?: Feature;
-  levels: Level[] = [];
+  levels: Level[] = []; 
   
   skills: Proficiency[] = []; //TYPE: "Skills"
-  raceSkills: string[] = []; //TYPE: "Skills"
   classSkills: string[] = []; //TYPE: "Skills"
   tools: Proficiency[] = []; //TYPE: "Artisan's Tools"
   instruments: Proficiency[] = []; //TYPE: "Musical Instruments"
@@ -172,29 +178,42 @@ export class DndpcgenComponent implements OnInit {
     return this.equipmentFG.get('eqOptions') as FormArray; 
   }
 
-  get skillOptions(): FormArray { 
-    return this.proficiencyFG.get('skillOptions') as FormArray; 
+  get abStr(): string{
+    return this.getAbilityBonusString("str");
   }
 
-  get toolOptions(): FormArray { 
-    return this.proficiencyFG.get('toolOptions') as FormArray; 
+  get abDex(): string{
+    return this.getAbilityBonusString("dex");
   }
 
-  get instrumentOptions(): FormArray { 
-    return this.proficiencyFG.get('instrumentOptions') as FormArray; 
+  get abCon(): string{
+    var bonus = this.getAbilityBonusString("con");
+    return bonus;
   }
-  
+
+  get abInt(): string{
+    var bonus = this.getAbilityBonusString("int");
+    return bonus;
+  }
+
+  get abWis(): string{
+    return this.getAbilityBonusString("wis");
+  }
+
+  get abCha(): string{
+    return this.getAbilityBonusString("cha");
+  }
+
+
   constructor(
     private dndpcgenserviceService: DndpcgenserviceService, 
     private _formBuilder: FormBuilder,
     public dialog: MatDialog) { 
-
+    this.subraces$ = EMPTY;
     this.character = EMPTY_CHARACTER;
     this.selectedRace = EMPTY_RACE;
-    this.subraceLanguage = '';
     this.selectedSubrace = EMPTY_SUBRACE;
     this.selectedClass = EMPTY_CLASS;
-   
     this.raceFG = this._formBuilder.group({
       race: ['', Validators.required],
       subrace: [''],
@@ -206,7 +225,7 @@ export class DndpcgenComponent implements OnInit {
       class: ['', Validators.required],
       classSkillOptions: new FormArray([]),
       classToolOptions: new FormArray([]),
-    });
+    }, { validators: validateClassSkillDuplicates });
     this.abilitiesFG = this._formBuilder.group({
       str: ['', Validators.required],
       dex: ['', Validators.required],
@@ -216,40 +235,37 @@ export class DndpcgenComponent implements OnInit {
       cha: ['', Validators.required],
     });
     this.proficiencyFG  = this._formBuilder.group({
-      skillOptions: new FormArray([]),
-      toolOptions: new FormArray([]),
-      instrumentOptions: new FormArray([]),
-      skill1: [''],
-      skill2: [''],
+      skill1: ['', Validators.required],
+      skill2: ['', Validators.required],
       artisantools: [''],
       instruments: [''],
       othertools: [''],
       languages: ['']
-    });
+    }, { validators: validateProficiencies });
+
     this.descriptionFG = this._formBuilder.group({
-      name: [''], 
+      name: ['', Validators.required], 
       height: [''],
       weight: [''],
       hair: [''],
       eyes: [''],
       deity: [''],
-      alignment: ['']
+      alignment: ['', Validators.required]
     });
     this.equipmentFG  = this._formBuilder.group({
       eqOptions: new FormArray([])
     });
     this.confirmationFG = this._formBuilder.group({});
+    
   }
 
     ngOnInit(): void {
-      this.eqOptions.clear();
+      this.eqOptions.clear(); 
       this.raceSkillOptions.clear();
       this.raceAbilityOptions.clear();
       this.classSkillOptions.clear();
       this.classToolOptions.clear();
-      this.skillOptions.clear();
-      this.toolOptions.clear();
-      this.instrumentOptions.clear();
+      this.subraces$ = EMPTY;
       this.getRaces();
       this.getClasses();
       this.getSkills();
@@ -260,16 +276,20 @@ export class DndpcgenComponent implements OnInit {
       this.getAlignments();
     }
 
-    getRaceDetails(myrace: any){
-      console.log("Getting Race Details....");
-      this.selectedSubrace = EMPTY_SUBRACE;
+
+    getRaceDetails(myrace:  MatSelectChange){
+      console.log("Getting Race Details for race: " + myrace.value.index);
       this.getSubracesForRace(myrace.value.index);
       this.getSkillsForRace();
       this.getAbilityOptionsForRace();
+      this.raceFG.get('subrace')?.setErrors(null);
+      this.clearSubraceErrors();
     }
 
-    getSubraceDetails(){
-      console.log("Getting SubraceDetails....");
+    clearSubraceErrors(){
+      this.raceFG.get('subraceLanguage')?.setErrors(null);
+      this.raceFG.get('raceSkillOptions')?.setErrors(null);
+      this.raceFG.get('raceAbilityOptions')?.setErrors(null);
     }
 
     saveRace(): void {
@@ -279,21 +299,26 @@ export class DndpcgenComponent implements OnInit {
       if(this.selectedSubrace){
         this.character.subrace = this.selectedSubrace;
         if(this.raceFG.value.subraceLanguage){
-          this.subraceLanguage = this.raceFG.value.subraceLanguage;
+          this.character.subraceLanguage = this.raceFG.value.subraceLanguage;
         }
       }
-      this.raceSkills = [];
+      this.character.raceSkills = [];
       if(this.selectedRace && this.raceFG.value.raceSkillOptions.length){
         this.raceFG.value.raceSkillOptions.forEach((option: string) => {
-            this.raceSkills.push(option); 
+            this.character.raceSkills.push(option); 
         });
       }
+
+      this.character.subraceAbilityOptions = [];
       if(this.selectedRace && this.raceFG.value.raceAbilityOptions.length > 0){
         this.raceFG.value.raceAbilityOptions.forEach((option: any) => {
-            this.selectedRace.ability_bonuses.push(option);  
+            if (option?.bonus){
+              this.character.subraceAbilityOptions.push(option);  
+            }
         });
       }
     }
+
 
     getClassDetails(myclass: any){
       console.log("Getting ClassDetails....");
@@ -333,50 +358,30 @@ export class DndpcgenComponent implements OnInit {
       return  bonus > 0 ? "+" + bonus.toString() : "";
     }
 
-    get abStr(): string{
-      return this.getAbilityBonusString("str");
-    }
-
-    get abDex(): string{
-      return this.getAbilityBonusString("dex");
-    }
-
-    get abCon(): string{
-      var bonus = this.getAbilityBonusString("con");
-      return bonus;
-    }
-
-    get abInt(): string{
-      var bonus = this.getAbilityBonusString("int");
-      return bonus;
-    }
-
-    get abWis(): string{
-      return this.getAbilityBonusString("wis");
-    }
-
-    get abCha(): string{
-      return this.getAbilityBonusString("cha");
-    }
-
     getAbilityBonus(ability: string): number {
       var race_ability_bonus;
       var race_bonus = 0;
       var subrace_ability_bonus;
       var subrace_bonus = 0;
-      if (this.selectedRace.ability_bonuses.length) {
-        race_ability_bonus = this.selectedRace.ability_bonuses.find(a => a?.ability_score.index === ability);
+      var race_ability_option_bouns;
+      var race_option_bonus = 0;
+      if (this.character.race.ability_bonuses.length) {
+        race_ability_bonus = this.character.race.ability_bonuses.find(a => a?.ability_score.index === ability);
         race_bonus = race_ability_bonus?.bonus ? race_ability_bonus.bonus : 0;
       }
-      if (this.selectedSubrace.ability_bonuses.length) {
-        subrace_ability_bonus = this.selectedSubrace.ability_bonuses.find(a => a?.ability_score.index === ability)
+      if (this.character.subrace.ability_bonuses.length) {
+        subrace_ability_bonus = this.character.subrace.ability_bonuses.find(a => a?.ability_score.index === ability)
         subrace_bonus = subrace_ability_bonus?.bonus ? subrace_ability_bonus.bonus : 0;
       }
-      return race_bonus + subrace_bonus as number;
+      if (this.character.subraceAbilityOptions) {
+        race_ability_option_bouns = this.character.subraceAbilityOptions.find((a: AbilityBonus) => a?.ability_score.index === ability);
+        race_option_bonus = race_ability_option_bouns?.bonus ? race_ability_option_bouns.bonus : 0;
+      }
+      return race_bonus + subrace_bonus + race_option_bonus as number;
     }
 
     addAbility(event: CdkDragDrop<string[]>) {
-      console.log("addAbility. container.id=" + event.container.id + " currentIndex=" + event.currentIndex + " previousContainer.id=" + event.previousContainer.id + " previousIndex=" + event.previousIndex);
+      //console.log("addAbility. container.id=" + event.container.id + " currentIndex=" + event.currentIndex + " previousContainer.id=" + event.previousContainer.id + " previousIndex=" + event.previousIndex);
       if (event.previousContainer === event.container) {
           moveItemInArray(event.container.data, 
                           event.previousIndex, 
@@ -421,11 +426,11 @@ export class DndpcgenComponent implements OnInit {
     }
 
     updateAbility(data: string[], index: number, id: string, prevId: string){
-      console.log("updateAbility. data=" + data + " index=" + index + " id=" + id + " prevId=" + prevId);
+      //console.log("updateAbility. data=" + data + " index=" + index + " id=" + id + " prevId=" + prevId);
       const previousBonus:number = this.getAbilityBonus(prevId);
       const containerBonus:number = this.getAbilityBonus(id);
       var abilityscore:number = Number(data[index]);
-      console.log("updateAbility. abilityscore=" + abilityscore + " containerBonus=" + containerBonus + " previousBonus=" + previousBonus);
+      //console.log("updateAbility. abilityscore=" + abilityscore + " containerBonus=" + containerBonus + " previousBonus=" + previousBonus);
       abilityscore -= previousBonus;
       abilityscore += containerBonus;
 
@@ -497,23 +502,19 @@ export class DndpcgenComponent implements OnInit {
       return new Array(i);
     }
 
+
     saveProficiencies(){
       console.log("Saving proficiencies....");
 
       this.character.skills = [];
-      if(this.skillOptions.length > 0){
-        for(let i = 0; i < this.skillOptions.length; i++) {
-          this.character.skills.push(this.skillOptions.at(i).value); 
-        }
-      }
       if(this.proficiencyFG.value.skill1){
         this.character.skills.push(this.proficiencyFG.value.skill1);
       }
       if(this.proficiencyFG.value.skill2){
         this.character.skills.push(this.proficiencyFG.value.skill2);
       }
-      if (this.raceSkills.length > 0){
-        this.raceSkills.forEach(s => this.character.skills.push(s));
+      if (this.character.raceSkills.length > 0){
+        this.character.raceSkills.forEach(s => this.character.skills.push(s));
 
       }
       if (this.classSkills.length > 0){
@@ -521,11 +522,6 @@ export class DndpcgenComponent implements OnInit {
       }
 
       this.character.proficiencies = [];
-      if(this.toolOptions.length > 0){
-        for(let i = 0; i < this.toolOptions.length; i++) {
-          this.character.proficiencies.push(this.toolOptions.at(i).value); 
-        }
-      }
       if(this.proficiencyFG.value.artisantools){
         this.proficiencyFG.value.artisantools.forEach((artisantool: string)  => {
           this.character.proficiencies.push(artisantool); 
@@ -550,7 +546,7 @@ export class DndpcgenComponent implements OnInit {
           this.character.languages.push(language.name); 
         })
         this.proficiencyFG.value.languages.forEach((language: string) => {
-          this.character.languages.push(language); 
+          this.character.languages.push(language);  
         });
       }
     }
@@ -637,11 +633,13 @@ export class DndpcgenComponent implements OnInit {
     }
 
     getSubracesForRace(race: string){
-      this.dndpcgenserviceService.getSubracesForRace(race)
-          .subscribe(subraces => {
-            this.subraces = [];
-            this.subraces = subraces;
-          });
+      // this.subraces = [];
+      // this.dndpcgenserviceService.getSubracesForRace(race)
+      //     .subscribe(subraces => {
+      //       console.log("Fected subraces: " + subraces.length)
+      //       this.subraces = subraces;
+      //     });
+      this.subraces$ = this.dndpcgenserviceService.getSubracesForRace(race);  
     }
 
     getSkillsForRace(){
